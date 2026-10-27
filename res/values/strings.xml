@@ -25,6 +25,7 @@
     <string name="cant_open">Não consegui abrir</string>
 
     <string name="about_title">Sobre o Cineluz</string>
+    <string name="support_button">Apoie o Cineluz</string>
     <string name="about_version">Versão %1$s</string>
     <string name="about_tagline">Tela inicial para projetores Android, com o HDMI em primeiro lugar.</string>
     <string name="about_project_url">github.com/eacarva/cineluz-launcher</string>

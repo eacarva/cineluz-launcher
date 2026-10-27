@@ -121,6 +121,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
                 APPS_START, APPS_END, v -> startActivity(new Intent(this, AppsActivity.class)));
 
         addAutoHdmiSwitch(root, GRID_LEFT, y2 + ROW_H + 40);
+        addSupportButton(root, GRID_LEFT + GRID_WIDTH - 72, y2 + ROW_H + 40);
 
         setContentView(root);
         hdmiTile.requestFocus();
@@ -462,6 +463,24 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         lp.topMargin = px(y);
         root.addView(row, lp);
         updateAutoHdmiSwitch(false);
+    }
+
+    /** Botão discreto (xícara de café) que abre a tela "Sobre", com o QR de apoio. */
+    private void addSupportButton(FrameLayout root, int x, int y) {
+        ImageView button = new ImageView(this);
+        button.setImageResource(R.drawable.ic_coffee);
+        button.setAlpha(0.85f);
+        button.setPadding(px(18), px(18), px(18), px(18));
+        button.setContentDescription(getString(R.string.support_button));
+        button.setFocusable(true);
+        button.setClickable(true);
+        button.setOnClickListener(v -> startActivity(new Intent(this, AboutActivity.class)));
+        Ui.pillBackground(button, unit);
+
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(px(72), px(72));
+        lp.leftMargin = px(x);
+        lp.topMargin = px(y);
+        root.addView(button, lp);
     }
 
     private void updateAutoHdmiSwitch(boolean animate) {

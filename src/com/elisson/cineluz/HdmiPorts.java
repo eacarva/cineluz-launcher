@@ -50,6 +50,12 @@ final class HdmiPorts {
 
     private static final Pattern TRAILING_NUMBER = Pattern.compile("(\\d+)\\D*$");
 
+    // Nomes genéricos que o HDMI-CEC usa enquanto o aparelho ainda não se
+    // identificou (ex.: ao ligar ou acordar): "Playback_1", "Recorder_2"...
+    private static final Pattern GENERIC_CEC_NAME = Pattern.compile(
+            "(?i)^(playback|recorder|tuner|audio[ _]?system|tv|reserved|free[ _]?use|unregistered)[ _]?\\d*$");
+    private static final String PREFS = "hdmi_names";
+
     private HdmiPorts() {
     }
 
@@ -69,10 +75,20 @@ final class HdmiPorts {
 
         // Aparelhos ligados por HDMI-CEC aparecem como entradas "filhas" da porta
         Map<String, String> deviceNames = new HashMap<>();
+        android.content.SharedPreferences names = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         for (TvInputInfo info : inputs) {
             if (info.getParentId() != null && info.getType() == TvInputInfo.TYPE_HDMI) {
                 CharSequence name = info.loadLabel(ctx);
-                if (!TextUtils.isEmpty(name)) deviceNames.put(info.getParentId(), name.toString());
+                if (TextUtils.isEmpty(name)) continue;
+                String n = name.toString().trim();
+                if (GENERIC_CEC_NAME.matcher(n).matches()) {
+                    // Nome provisório: usa o último nome de verdade desta porta, se houver
+                    String last = names.getString(info.getParentId(), null);
+                    if (last != null) deviceNames.put(info.getParentId(), last);
+                } else {
+                    deviceNames.put(info.getParentId(), n);
+                    names.edit().putString(info.getParentId(), n).apply();
+                }
             }
         }
 

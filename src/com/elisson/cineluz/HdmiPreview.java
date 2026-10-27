@@ -50,6 +50,12 @@ final class HdmiPreview {
         public void onInputRemoved(String inputId) {
             listener.onPortsChanged();
         }
+
+        @Override
+        public void onTvInputInfoUpdated(android.media.tv.TvInputInfo info) {
+            // Ex.: o aparelho no HDMI terminou de se identificar via CEC
+            listener.onPortsChanged();
+        }
     };
 
     HdmiPreview(Context ctx, FrameLayout tile, View icon, Listener listener) {

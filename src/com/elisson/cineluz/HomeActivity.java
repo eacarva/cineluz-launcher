@@ -556,12 +556,12 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         updateAutoHdmiSwitch(false);
     }
 
-    /** Botão discreto (xícara de café) que abre a tela "Sobre", com o QR de apoio. */
+    /** Botão discreto com o símbolo do Cineluz: abre a tela "Sobre", com o QR de apoio. */
     private void addSupportButton(FrameLayout root, int x, int y) {
         ImageView button = new ImageView(this);
-        button.setImageResource(R.drawable.ic_coffee);
-        button.setAlpha(0.85f);
-        button.setPadding(px(18), px(18), px(18), px(18));
+        button.setImageResource(R.drawable.ic_brand_mark);
+        button.setAlpha(0.9f);
+        button.setPadding(px(16), px(16), px(16), px(16));
         button.setContentDescription(getString(R.string.support_button));
         button.setFocusable(true);
         button.setClickable(true);

@@ -80,7 +80,7 @@ para a tela inicial de fábrica.
 | **Segurar OK** (ou **Menu**) em AirPlay, Miracast, Arquivos ou Configurações | Escolher o app daquele bloco |
 | **Home** na tela inicial | Reinicia a prévia do HDMI (se a imagem sumir) |
 | Chave **Abrir HDMI ao ligar** | Liga/desliga a abertura automática do HDMI |
-| Xícara ☕ no canto inferior direito | Sobre o Cineluz e como apoiar o projeto |
+| Símbolo do Cineluz no canto inferior direito | Sobre o Cineluz e como apoiar o projeto |
 
 Se ninguém mexer no controle por alguns minutos na tela inicial, aparece um **relógio**
 que muda de lugar a cada minuto (para não marcar a imagem). Qualquer tecla volta.

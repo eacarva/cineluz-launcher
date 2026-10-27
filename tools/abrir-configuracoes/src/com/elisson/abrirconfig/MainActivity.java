@@ -78,7 +78,8 @@ public class MainActivity extends Activity {
         List<Intent> dev = developerScreens();
         if (!dev.isEmpty()) {
             action("Abrir as Opções do desenvolvedor",
-                    "Lá dentro, ligue \"Depuração USB\" e, se houver, o ADB pela rede.",
+                    "Lá dentro, ligue \"Depuração USB\" e o ADB pela rede (\"Internet Adb\", \"Depuração por rede\" "
+                            + "ou \"Depuração por Wi-Fi\", conforme o aparelho).",
                     v -> openFirst(dev));
         }
         Intent about = prefer(new Intent(Settings.ACTION_DEVICE_INFO_SETTINGS));
@@ -142,14 +143,18 @@ public class MainActivity extends Activity {
 
     // ---------- Telas ----------
 
-    /** Caminhos conhecidos para as Opções do desenvolvedor, do mais comum ao mais raro. */
+    /**
+     * Caminhos conhecidos para as Opções do desenvolvedor. As de TV primeiro: numa
+     * box são as do próprio aparelho e costumam ter o ADB pela rede (na UniTV S1,
+     * "Internet Adb"), que as do Android de celular não têm.
+     */
     private List<Intent> developerScreens() {
         Intent[] candidates = {
+                new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).setPackage(TV),
+                new Intent().setComponent(new ComponentName(TV, TV + ".system.development.DevelopmentActivity")),
                 new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).setPackage(PHONE),
                 new Intent().setComponent(new ComponentName(PHONE, PHONE + ".Settings$DevelopmentSettingsDashboardActivity")),
                 new Intent().setComponent(new ComponentName(PHONE, PHONE + ".DevelopmentSettings")),
-                new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).setPackage(TV),
-                new Intent().setComponent(new ComponentName(TV, TV + ".system.development.DevelopmentActivity")),
         };
         List<Intent> found = new ArrayList<>();
         for (Intent i : candidates) if (resolves(i)) found.add(i);

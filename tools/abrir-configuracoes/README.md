@@ -17,7 +17,7 @@ Mostra só os botões das telas que existem no aparelho.
 
 | Aparelho | Resultado |
 |---|---|
-| **UniTV S1** (Rockchip RK322x, Android 7.1.2) | ✅ Abre as Opções do desenvolvedor (com o menu de ADB pela rede) e desativa/reativa o Google Play Services |
+| **UniTV S1** (Rockchip RK322x, Android 7.1.2) | ✅ Abre as Opções do desenvolvedor das Configurações de TV, que têm o **"Internet Adb"** (ADB pela rede; as Configurações completas não têm), e desativa/reativa o Google Play Services |
 | Projetor HY320 (Android 11) | ✅ Abre as Opções do desenvolvedor das Configurações de TV |
 
 ## Como usar

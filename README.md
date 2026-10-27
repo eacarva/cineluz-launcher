@@ -151,6 +151,10 @@ Releases. Em aparelhos que deixam escolher o descanso de tela, o Cineluz também
 o *Relógio do Cineluz* como descanso de tela do sistema. Relatos de outros aparelhos e
 contribuições são bem-vindos em [Issues](../../issues).
 
+Box travada, sem como ligar o ADB pelo menu? O app auxiliar
+[Abrir Configurações](tools/abrir-configuracoes/) abre as Opções do desenvolvedor
+escondidas (testado na UniTV S1).
+
 ## Apoie
 
 O Cineluz é gratuito e vai continuar assim. Se ele foi útil e você quiser agradecer

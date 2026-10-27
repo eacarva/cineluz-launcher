@@ -29,6 +29,8 @@
     <string name="support_button">Sobre o Cineluz e como apoiar</string>
     <string name="about_version">Versão %1$s</string>
     <string name="about_tagline">Tela inicial para projetores Android, com o HDMI em primeiro lugar.</string>
+    <string name="about_verse">“Portanto, quer comais, quer bebais ou façais outra coisa qualquer, fazei\ntudo para a glória de Deus.”</string>
+    <string name="about_verse_ref">1 Coríntios 10:31</string>
     <string name="about_project_url">github.com/eacarva/cineluz-launcher</string>
     <string name="donate_text">Gostou? Se quiser apoiar o projeto, aponte a câmera do celular:</string>
     <!-- Vazio = sem seção de apoio na tela Sobre. O QR (drawable donate_qr) leva a esta página,

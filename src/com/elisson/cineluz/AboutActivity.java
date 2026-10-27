@@ -3,6 +3,7 @@ package com.elisson.cineluz;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.TypedValue;
@@ -33,24 +34,30 @@ public class AboutActivity extends Activity {
 
         ImageView icon = new ImageView(this);
         icon.setImageResource(R.drawable.app_icon);
-        root.addView(icon, new LinearLayout.LayoutParams(px(140), px(140)));
+        root.addView(icon, new LinearLayout.LayoutParams(px(120), px(120)));
 
         root.addView(text(getString(R.string.app_name), 60, Color.WHITE, 24));
         root.addView(text(getString(R.string.about_version, versionName()), 30, 0xB3FFFFFF, 8));
         root.addView(text(getString(R.string.about_tagline), 30, 0xB3FFFFFF, 8));
-        root.addView(text(getString(R.string.about_project_url), 30, Color.WHITE, 32));
+        root.addView(text(getString(R.string.about_project_url), 30, Color.WHITE, 24));
+
+        TextView verse = text(getString(R.string.about_verse), 28, 0xCCFFFFFF, 36);
+        verse.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
+        verse.setMaxWidth(px(1100));
+        root.addView(verse);
+        root.addView(text(getString(R.string.about_verse_ref), 26, 0x99FFFFFF, 6));
 
         // Apoio: só aparece se o projeto tiver um link de doação configurado
         String donateUrl = getString(R.string.donate_url);
         int qr = getResources().getIdentifier("donate_qr", "drawable", getPackageName());
         if (!TextUtils.isEmpty(donateUrl) && qr != 0) {
-            root.addView(text(getString(R.string.donate_text), 30, Color.WHITE, 56));
+            root.addView(text(getString(R.string.donate_text), 30, Color.WHITE, 40));
             ImageView code = new ImageView(this);
             code.setImageResource(qr);
             code.setBackgroundColor(Color.WHITE);
             code.setPadding(px(14), px(14), px(14), px(14));
-            LinearLayout.LayoutParams qlp = new LinearLayout.LayoutParams(px(240), px(240));
-            qlp.topMargin = px(20);
+            LinearLayout.LayoutParams qlp = new LinearLayout.LayoutParams(px(200), px(200));
+            qlp.topMargin = px(16);
             root.addView(code, qlp);
             root.addView(text(donateUrl, 26, 0xB3FFFFFF, 14));
         }

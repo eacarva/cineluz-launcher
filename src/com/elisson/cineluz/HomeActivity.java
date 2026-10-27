@@ -191,7 +191,38 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         resetIdleTimer();
+        if (handleHoldOk(event)) return true;
         return super.dispatchKeyEvent(event);
+    }
+
+    /**
+     * "Segurar OK" nos blocos. O Android detecta o toque longo por tempo, mas
+     * nem todo controle segue esse tempo; aqui conta como segurar quando o
+     * controle repete a tecla (é o que todos fazem com o botão pressionado).
+     */
+    private boolean holdHandled;
+
+    private boolean handleHoldOk(KeyEvent event) {
+        int key = event.getKeyCode();
+        if (key != KeyEvent.KEYCODE_DPAD_CENTER && key != KeyEvent.KEYCODE_ENTER) return false;
+        View focused = getCurrentFocus();
+        if (focused == null || !focused.isLongClickable()) return false;
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() > 0) {
+            if (!holdHandled) {
+                holdHandled = true;
+                focused.setPressed(false);
+                focused.performLongClick();
+            }
+            return true;
+        }
+        if (event.getAction() == KeyEvent.ACTION_UP && holdHandled) {
+            // Solta o botão depois de segurar: não vira um clique
+            holdHandled = false;
+            focused.setPressed(false);
+            return true;
+        }
+        if (event.getAction() == KeyEvent.ACTION_DOWN) holdHandled = false;
+        return false;
     }
 
     private void resetIdleTimer() {

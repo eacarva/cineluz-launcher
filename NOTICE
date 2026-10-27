@@ -1,7 +1,10 @@
 Cineluz Launcher
-Copyright 2026 Elisson Andrade
+Required Notice: Copyright 2026 Elisson Andrade (https://github.com/eacarva/cineluz-launcher)
 
-Este produto é distribuído sob a Apache License 2.0 (veja LICENSE).
+Este software é distribuído sob a PolyForm Noncommercial License 1.0.0 (veja LICENSE):
+uso pessoal e não comercial é livre; uso comercial (vender, pré-instalar em produtos,
+cobrar por serviços com ele) só com autorização do autor: contato@elissonandrade.com.br.
 
 Inclui ícones do Material Symbols, do Google
-(https://github.com/google/material-design-icons), também sob a Apache License 2.0.
+(https://github.com/google/material-design-icons), distribuídos sob a Apache License 2.0
+(texto em licenses/Apache-2.0.txt). Os ícones continuam sob a licença original deles.

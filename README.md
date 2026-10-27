@@ -4,7 +4,7 @@
 
 # Cineluz Launcher — launcher leve e sem anúncios para projetor Android e TV box
 
-**Cineluz Launcher** é uma tela inicial (launcher) **gratuita, de código aberto e sem
+**Cineluz Launcher** é uma tela inicial (launcher) **gratuita, com código aberto e sem
 anúncios** para **projetores Android** e **TV boxes Android**. Em projetores, ele coloca a
 **entrada HDMI em primeiro lugar**, com uma prévia ao vivo e sem som. Em TV boxes, o bloco
 grande vira o seu **app principal**, que pode **abrir sozinho ao ligar**, inclusive quando a
@@ -17,7 +17,7 @@ no **projetor HY320** (Magcubic, Allwinner H713, Android 11) e na **TV box UniTV
 
 ![Tela inicial do Cineluz Launcher no projetor HY320, com o bloco HDMI em destaque](docs/screenshot-home.png)
 
-> 🇬🇧 **English:** Cineluz Launcher is a free, open-source, ad-free, ~76 KB **home screen
+> 🇬🇧 **English:** Cineluz Launcher is a free, source-available, ad-free, ~76 KB **home screen
 > for Android projectors and Android TV boxes**. Tested on the **HY320 projector** and the
 > **UniTV S1 TV box**. [Read in English ↓](#english)
 
@@ -26,7 +26,8 @@ no **projetor HY320** (Magcubic, Allwinner H713, Android 11) e na **TV box UniTV
 | | |
 |---|---|
 | **O que é** | Launcher (tela inicial) para projetor Android e TV box Android |
-| **Preço** | Gratuito, código aberto (Apache 2.0), sem anúncios |
+| **Preço** | Gratuito para uso pessoal, código aberto para ver e modificar, sem anúncios |
+| **Licença** | [PolyForm Noncommercial 1.0.0](LICENSE): uso comercial só com autorização |
 | **Tamanho** | ~76 KB |
 | **Internet** | Não usa: o app não tem permissão de internet |
 | **Android** | 7.0 ou mais novo, sem root |
@@ -224,7 +225,7 @@ Obrigado! 🙏
 
 ## English
 
-**Cineluz Launcher** is a free, open-source, ad-free, lightweight (~76 KB) **launcher
+**Cineluz Launcher** is a free, source-available, ad-free, lightweight (~76 KB) **launcher
 (home screen) for Android projectors and Android TV boxes**.
 
 - **Opens your main app or HDMI automatically** when the device turns on — including TV
@@ -251,5 +252,14 @@ The app UI is currently in Brazilian Portuguese; translations are welcome.
 
 ## Licença / License
 
-[Apache License 2.0](LICENSE). Ícones / icons:
-[Material Symbols](https://github.com/google/material-design-icons) (Google, Apache 2.0).
+**[PolyForm Noncommercial License 1.0.0](LICENSE).** Você pode usar, estudar, modificar e
+compartilhar o Cineluz **de graça, para uso pessoal e não comercial**. **Uso comercial**
+— vender, pré-instalar em aparelhos vendidos, cobrar por instalação ou por serviços com
+ele, ou distribuir versões modificadas com fins comerciais — **só com autorização do
+autor**: contato@elissonandrade.com.br.
+
+*Free for personal and other noncommercial use. Commercial use (selling it, preinstalling
+it on devices for sale, charging for it) requires permission from the author.*
+
+Ícones / icons: [Material Symbols](https://github.com/google/material-design-icons)
+(Google), sob a licença original deles, Apache 2.0 ([texto](licenses/Apache-2.0.txt)).

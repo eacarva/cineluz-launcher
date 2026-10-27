@@ -39,3 +39,8 @@ Mostra só os botões das telas que existem no aparelho.
 ./build.sh            # gera build/abrir-configuracoes.apk
 ./build.sh install    # e instala no aparelho conectado ao adb
 ```
+
+## Licença
+
+Mesma do Cineluz: [PolyForm Noncommercial 1.0.0](../../LICENSE) — uso pessoal e não
+comercial livre; uso comercial só com autorização do autor.

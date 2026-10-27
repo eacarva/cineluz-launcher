@@ -85,7 +85,7 @@ para a tela inicial de fábrica.
 | Botão **Ao ligar ⌄** (ex.: *HDMI ⌄*) | Escolher o que abrir ao ligar: HDMI ou um app |
 | Chave verde/vermelha ao lado | Liga/desliga a abertura automática ao ligar o aparelho |
 | **OK** / **Segurar OK** no bloco grande (aparelho sem HDMI) | Abre o app principal / troca o app |
-| Símbolo do Cineluz no canto inferior direito | Sobre o Cineluz e como apoiar o projeto |
+| Símbolo do Cineluz no canto inferior direito | Sobre o Cineluz, **Ferramentas da box** e como apoiar o projeto |
 
 Se ninguém mexer no controle por alguns minutos na tela inicial, aparece um **relógio**
 que muda de lugar a cada minuto (para não marcar a imagem). Qualquer tecla volta.
@@ -151,9 +151,11 @@ Releases. Em aparelhos que deixam escolher o descanso de tela, o Cineluz também
 o *Relógio do Cineluz* como descanso de tela do sistema. Relatos de outros aparelhos e
 contribuições são bem-vindos em [Issues](../../issues).
 
-Box travada, sem como ligar o ADB pelo menu? O app auxiliar
-[Abrir Configurações](tools/abrir-configuracoes/) abre as Opções do desenvolvedor
-escondidas (testado na UniTV S1).
+Box travada, sem como ligar o ADB pelo menu? Em **Sobre → Ferramentas da box**, o
+Cineluz abre as Opções do desenvolvedor escondidas (testado na UniTV S1), desativa ou
+reativa os serviços do Google para liberar memória e mostra um diagnóstico de energia.
+Para boxes sem o Cineluz, as mesmas ferramentas existem como app separado:
+[Abrir Configurações](tools/abrir-configuracoes/).
 
 ## Apoie
 

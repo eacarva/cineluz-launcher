@@ -33,10 +33,36 @@
     <string name="about_version">Versão %1$s</string>
     <string name="about_tagline">Tela inicial para projetores e TV boxes Android: HDMI ou seu app principal em primeiro lugar.</string>
     <string name="about_verse">“Portanto, quer comais, quer bebais ou façais outra coisa qualquer, fazei\ntudo para a glória de Deus.”</string>
-    <string name="about_power_log">Diagnóstico de energia (últimos eventos):</string>
+    <string name="about_tools_title">Ferramentas da box</string>
+    <string name="about_tools_hint">Ligar o ADB, liberar memória desativando os serviços do Google e diagnóstico.</string>
+    <string name="about_donate_title">Apoie o projeto</string>
+
+    <string name="tools_subtitle">Telas que o menu desta box esconde. Siga os passos de cima para baixo.</string>
+    <string name="tools_adb_section">Ligar o ADB (depuração)</string>
+    <string name="tools_dev_title">Abrir as Opções do desenvolvedor</string>
+    <string name="tools_dev_hint">Lá dentro, ligue “Depuração USB” e o ADB pela rede (“Internet Adb”, “Depuração por rede” ou “Depuração por Wi-Fi”, conforme o aparelho).</string>
+    <string name="tools_about_title">Não abriu? Ative o modo desenvolvedor</string>
+    <string name="tools_about_hint">Abre “Sobre o dispositivo”: aperte OK 7 vezes em “Número da versão” e volte ao passo acima.</string>
+    <string name="tools_google_section">Serviços do Google (liberar memória)</string>
+    <string name="tools_google_note">Sem eles, a Play Store, o YouTube e outros apps do Google param de funcionar até você reativar aqui.</string>
+    <string name="tools_gms_admin_title">Desativar o Google Play Services: passo A</string>
+    <string name="tools_gms_admin_hint">Estado: ativo. Abra cada item do Google (“Localizador”, “Screen lock service”) e escolha “Desativar o administrador”. Depois volte aqui.</string>
+    <string name="tools_gms_off_title">Desativar o Google Play Services</string>
+    <string name="tools_gms_on_title">Reativar o Google Play Services</string>
+    <string name="tools_store_off_title">Desativar a Play Store</string>
+    <string name="tools_store_on_title">Reativar a Play Store</string>
+    <string name="tools_state_on_hint">Estado: ativo. Na tela que abrir, aperte “Desativar”.</string>
+    <string name="tools_state_off_hint">Estado: desativado. Na tela que abrir, aperte “Ativar”.</string>
+    <string name="tools_other_section">Outros</string>
+    <string name="tools_settings_title">Configurações completas do Android</string>
+    <string name="tools_settings_hint">Todas as opções do Android, inclusive as que o menu da box não mostra.</string>
+    <string name="tools_diag_section">Diagnóstico de energia</string>
+    <string name="tools_diag_note">O que o aparelho avisou nas últimas vezes que desligou e ligou. Ajuda quando o “Ao ligar” não abre o app sozinho.</string>
+    <string name="tools_diag_empty">Nenhum evento ainda.</string>
+    <string name="tools_cant_open">Esta box não deixou abrir. Tente o botão de baixo.</string>
     <string name="about_verse_ref">1 Coríntios 10:31</string>
     <string name="about_project_url">github.com/eacarva/cineluz-launcher</string>
-    <string name="donate_text">Gostou? Se quiser apoiar o projeto, aponte a câmera do celular:</string>
+    <string name="donate_text">Gostou? Aponte a câmera do celular para apoiar com PIX.</string>
     <!-- Vazio = sem seção de apoio na tela Sobre. O QR (drawable donate_qr) leva a esta página,
          onde fica o PIX — assim, se a chave mudar, só o README precisa ser atualizado. -->
     <string name="donate_url" translatable="false">github.com/eacarva/cineluz-launcher#apoie</string>

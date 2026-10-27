@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.elisson.cineluz"
-    android:versionCode="5"
-    android:versionName="1.1.3">
+    android:versionCode="6"
+    android:versionName="1.2.0">
 
     <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="30" />
 
@@ -33,6 +33,21 @@
         <intent>
             <action android:name="android.settings.SETTINGS" />
         </intent>
+        <!-- Ferramentas da box: telas de configuração e serviços do Google -->
+        <intent>
+            <action android:name="android.settings.APPLICATION_DEVELOPMENT_SETTINGS" />
+        </intent>
+        <intent>
+            <action android:name="android.settings.DEVICE_INFO_SETTINGS" />
+        </intent>
+        <intent>
+            <action android:name="android.settings.APPLICATION_DETAILS_SETTINGS" />
+            <data android:scheme="package" />
+        </intent>
+        <package android:name="com.android.settings" />
+        <package android:name="com.android.tv.settings" />
+        <package android:name="com.google.android.gms" />
+        <package android:name="com.android.vending" />
         <!-- App de HDMI e serviço de entradas dos projetores Allwinner -->
         <package android:name="com.softwinner.awlivetv" />
         <package android:name="com.softwinner.vis" />
@@ -86,6 +101,11 @@
 
         <activity
             android:name=".AboutActivity"
+            android:screenOrientation="landscape"
+            android:exported="false" />
+
+        <activity
+            android:name=".ToolsActivity"
             android:screenOrientation="landscape"
             android:exported="false" />
 

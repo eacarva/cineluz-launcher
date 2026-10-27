@@ -47,6 +47,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     // App a abrir ao ligar (vazio = HDMI) e se o aparelho já mostrou entradas HDMI
     private static final String PREF_START_APP = "start_app";
     private static final String PREF_HAS_HDMI = "has_hdmi";
+    private static final String PREF_ASKED_START = "asked_start_app";
     private static final String START_SLOT = "start";
 
     private static final String PREF_ASKED_HOME = "asked_home";
@@ -167,7 +168,17 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         setContentView(root);
         mainTile.requestFocus();
 
-        // Primeira vez: oferece virar a tela inicial padrão
+        // Primeira vez num aparelho sem HDMI: antes de tudo, escolher o app principal
+        if (!hasHdmi && startAppIntent() == null && !prefs.getBoolean(PREF_ASKED_START, false)) {
+            prefs.edit().putBoolean(PREF_ASKED_START, true).apply();
+            handler.postDelayed(this::pickStartApp, 800);
+        } else {
+            askFirstRunQuestions();
+        }
+    }
+
+    /** Primeira vez: oferece virar a tela inicial padrão; depois, a localização. */
+    private void askFirstRunQuestions() {
         if (!isDefaultHome() && !prefs.getBoolean(PREF_ASKED_HOME, false)) {
             prefs.edit().putBoolean(PREF_ASKED_HOME, true).apply();
             handler.postDelayed(this::requestDefaultHome, 800);
@@ -293,7 +304,12 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
             maybeAskLocation();
             return;
         }
-        if (requestCode == REQUEST_PICK_START && resultCode == RESULT_OK && data != null) {
+        if (requestCode == REQUEST_PICK_START && (resultCode != RESULT_OK || data == null)) {
+            // Saiu da lista sem escolher: segue para as outras perguntas da primeira vez
+            askFirstRunQuestions();
+            return;
+        }
+        if (requestCode == REQUEST_PICK_START) {
             // Escolher o que abrir já liga a abertura automática
             String pkg = data.getStringExtra(AppsActivity.EXTRA_PACKAGE);
             SharedPreferences.Editor e = prefs.edit().putBoolean(PREF_AUTO_OPEN, true);
@@ -337,8 +353,17 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
                 return;
             }
         }
+        // Algumas boxes têm dois apps de configurações (celular e TV); abre direto um
+        // deles para o Android não perguntar "Complete a ação usando"
         Intent settings = new Intent(Settings.ACTION_HOME_SETTINGS);
-        if (settings.resolveActivity(getPackageManager()) != null) {
+        List<android.content.pm.ResolveInfo> handlers = getPackageManager()
+                .queryIntentActivities(settings, android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
+        if (!handlers.isEmpty()) {
+            android.content.pm.ActivityInfo target = handlers.get(0).activityInfo;
+            for (android.content.pm.ResolveInfo ri : handlers) {
+                if ("com.android.settings".equals(ri.activityInfo.packageName)) target = ri.activityInfo;
+            }
+            settings.setClassName(target.packageName, target.name);
             startActivityForResult(settings, REQUEST_HOME_ROLE);
         } else {
             // Aparelhos antigos: o Android pergunta qual tela inicial usar

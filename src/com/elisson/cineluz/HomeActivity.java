@@ -43,6 +43,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     private static final String PREFS = "launcher";
     private static final String PREF_AUTO_OPEN = "auto_hdmi"; // nome antigo, mantido para quem atualiza
     private static final String PREF_LAST_BOOT = "last_boot_count";
+    private static final String PREF_LAST_UPTIME = "last_uptime";
     private static final String PREF_HDMI_PORT = "hdmi_port";
     // App a abrir ao ligar (vazio = HDMI) e se o aparelho já mostrou entradas HDMI
     private static final String PREF_START_APP = "start_app";
@@ -95,6 +96,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+        PowerEvents.register(getApplicationContext());
         DisplayMetrics dm = getResources().getDisplayMetrics();
         unit = Math.max(dm.widthPixels, dm.heightPixels) / 1920f;
 
@@ -450,19 +452,13 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     }
 
     /**
-     * Na primeira vez que a tela inicial aparece depois de ligar, abre o app
-     * escolhido ou o HDMI. Devolve true se vai abrir.
+     * Na primeira vez que a tela inicial aparece depois de ligar (ou de acordar
+     * do modo de espera, como nas TV boxes), abre o app escolhido ou o HDMI.
+     * Devolve true se vai abrir.
      */
     private boolean maybeOpenAfterBoot() {
-        int bootCount = Settings.Global.getInt(getContentResolver(), "boot_count", -1);
-        if (bootCount < 0) return false;
-        int lastBoot = prefs.getInt(PREF_LAST_BOOT, -1);
-        if (bootCount == lastBoot) return false;
-        prefs.edit().putInt(PREF_LAST_BOOT, bootCount).apply();
-
-        boolean firstRunEver = lastBoot < 0;
-        boolean justBooted = SystemClock.elapsedRealtime() < 10 * 60 * 1000;
-        if (firstRunEver || !justBooted || !autoOpenEnabled()) return false;
+        boolean turnedOn = justBooted() || PowerEvents.consumeWake();
+        if (!turnedOn || !autoOpenEnabled()) return false;
         Intent app = startAppIntent();
         if (app != null) {
             handler.postDelayed(() -> Launcher.start(this, app), 1500);
@@ -471,6 +467,22 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         if (!hasHdmi) return false;
         openHdmiWhenReady(0);
         return true;
+    }
+
+    /**
+     * Reiniciou desde a última vez? Usa o contador de inicializações do Android
+     * e, onde ele não existe (algumas boxes), o tempo ligado que "voltou a zero".
+     */
+    private boolean justBooted() {
+        long uptime = SystemClock.elapsedRealtime();
+        long lastUptime = prefs.getLong(PREF_LAST_UPTIME, -1);
+        int bootCount = Settings.Global.getInt(getContentResolver(), "boot_count", -1);
+        int lastBoot = prefs.getInt(PREF_LAST_BOOT, -1);
+        prefs.edit().putLong(PREF_LAST_UPTIME, uptime).putInt(PREF_LAST_BOOT, bootCount).apply();
+
+        if (lastUptime < 0) return false; // primeira vez do Cineluz: não abre nada sozinho
+        boolean rebooted = (bootCount >= 0 && lastBoot >= 0) ? bootCount != lastBoot : uptime < lastUptime;
+        return rebooted && uptime < 10 * 60 * 1000;
     }
 
     /** Logo depois de ligar, as entradas podem demorar a aparecer: tenta por alguns segundos. */

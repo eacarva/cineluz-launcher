@@ -30,7 +30,8 @@ para ela. O Cineluz resolve exatamente isso:
   outra porta e a prévia muda para ela. Mostra até o nome do aparelho via **HDMI-CEC**.
 - **O controle remoto do projetor continua comandando o aparelho no HDMI** (HDMI-CEC).
 - **Sem anúncios, sem internet** — o app nem tem permissão de acesso à internet.
-- **Descanso de tela com relógio** — substitui descansos de tela com propaganda.
+- **Relógio por inatividade** — aparece antes do descanso de tela do fabricante (que em
+  alguns projetores mostra propaganda em vídeo) e muda de lugar para não marcar a imagem.
 - **Blocos configuráveis** — AirPlay (AirPin), Miracast, Arquivos e Configurações já
   vêm apontando para os apps certos do aparelho; qualquer bloco pode abrir outro app.
 - **Indicador de Wi-Fi** — mostra a rede e o sinal; um clique abre a lista de redes.
@@ -49,37 +50,22 @@ Requer **Android 7.0 ou mais novo**. Não precisa de root.
 
 ## Como instalar
 
-1. No projetor, ative **Opções do desenvolvedor → Depuração USB** (em muitos
-   projetores, também a **depuração pela rede / ADB**).
-2. Baixe o APK mais recente em **[Releases](../../releases)**.
-3. No computador, com o [adb (Android Platform Tools)](https://developer.android.com/tools/releases/platform-tools):
+1. **Baixe o APK** — no próprio projetor (pelo navegador ou pelo app *Downloader*) ou
+   no celular/computador para passar por pendrive:
 
-```bash
-adb connect IP-DO-PROJETOR:5555
-adb install cineluz-launcher-1.0.0.apk
-adb shell cmd package set-home-activity com.elisson.cineluz/.HomeActivity
-```
+   **[⬇️ Baixar o Cineluz Launcher](https://github.com/eacarva/cineluz-launcher/releases/latest/download/cineluz-launcher.apk)**
 
-Opcional — mostrar o **nome da rede Wi-Fi** (o Android exige a permissão de localização
-para isso) e usar o **relógio do Cineluz como descanso de tela**:
+2. **Instale** — abra o arquivo baixado. Se o Android pedir, permita instalar apps
+   desse app (*fontes desconhecidas*).
+3. **Abra o Cineluz** e confirme quando ele perguntar se deve ser a **tela inicial**.
 
-```bash
-adb shell pm grant com.elisson.cineluz android.permission.ACCESS_FINE_LOCATION
-adb shell settings put secure screensaver_components com.elisson.cineluz/com.elisson.cineluz.ClockDream
-```
+Pronto. Ele também pede, uma vez, a permissão de localização — o Android só deixa um
+app ler o **nome da rede Wi-Fi** com ela. Pode recusar sem problema.
 
-**Sem computador?** Copie o APK para um pendrive e instale pelo gerenciador de arquivos
-do projetor. Se, ao apertar Home, o Android perguntar qual tela inicial usar, escolha
-*Cineluz Launcher* e marque *Sempre*. (Se ele não perguntar, use o comando
-`set-home-activity` acima pelo computador.)
+### Desinstalar
 
-### Voltar ao launcher original
-
-```bash
-adb uninstall com.elisson.cineluz
-```
-
-O Android volta sozinho para o launcher de fábrica.
+*Configurações → Apps → Cineluz Launcher → Desinstalar.* O projetor volta sozinho
+para a tela inicial de fábrica.
 
 ## Como usar
 
@@ -90,13 +76,18 @@ O Android volta sozinho para o launcher de fábrica.
 | **Segurar OK** (ou **Menu**) em AirPlay, Miracast, Arquivos ou Configurações | Escolher o app daquele bloco |
 | **Home** na tela inicial | Reinicia a prévia do HDMI (se a imagem sumir) |
 | Chave **Abrir HDMI ao ligar** | Liga/desliga a abertura automática do HDMI |
+| Xícara ☕ no canto inferior direito | Sobre o Cineluz e como apoiar o projeto |
+
+Se ninguém mexer no controle por alguns minutos na tela inicial, aparece um **relógio**
+que muda de lugar a cada minuto (para não marcar a imagem). Qualquer tecla volta.
 
 ## Perguntas frequentes
 
 **Como tirar os anúncios do projetor HY320 (ou HY300)?**
-Os anúncios vêm do launcher de fábrica e do descanso de tela dele. Instale o Cineluz
-como tela inicial e troque o descanso de tela pelo relógio do Cineluz (comandos acima).
-Não precisa trocar o firmware nem fazer root.
+Os anúncios vêm do launcher de fábrica e do descanso de tela dele. Instale o Cineluz e
+escolha-o como tela inicial: a tela de fábrica sai de cena e, quando o projetor fica
+parado, aparece o relógio do Cineluz no lugar do descanso de tela com propaganda.
+Não precisa trocar o firmware, fazer root nem usar computador.
 
 **Como fazer o projetor Android abrir direto no HDMI ao ligar?**
 Com o Cineluz como tela inicial, deixe ligada a chave *Abrir HDMI ao ligar*. Na
@@ -125,21 +116,24 @@ Não. O Cineluz não tem permissão de internet. As permissões usadas são: aju
 áudio (deixar a prévia muda), estado da rede/Wi-Fi (indicador de rede) e,
 opcionalmente, localização (o Android só deixa ler o nome do Wi-Fi com ela).
 
-**Preciso de root ou de firmware modificado?**
-Não. É um app comum, instalado por adb ou pendrive, e dá para desinstalar a qualquer momento.
+**Preciso de computador, root ou firmware modificado?**
+Não. É um app comum: baixe, instale e escolha como tela inicial. Dá para desinstalar a
+qualquer momento.
 
-## Compilar
+## Para desenvolvedores
 
-Sem Gradle — só o JDK 11+ e o Android SDK (`build-tools` 34+ e `platforms;android-30`):
+Compila sem Gradle — só o JDK 11+ e o Android SDK (`build-tools` 34+ e
+`platforms;android-30`):
 
 ```bash
 ./build.sh            # gera build/cineluz-launcher-<versão>.apk
 ./build.sh install    # gera e instala no aparelho conectado ao adb
 ```
 
-Cada push no GitHub compila o APK automaticamente; cada tag `v*` publica uma versão
-assinada em Releases. Contribuições e relatos de outros aparelhos são bem-vindos em
-[Issues](../../issues).
+Cada push compila o APK no GitHub Actions; cada tag `v*` publica uma versão assinada em
+Releases. Em aparelhos que deixam escolher o descanso de tela, o Cineluz também oferece
+o *Relógio do Cineluz* como descanso de tela do sistema. Relatos de outros aparelhos e
+contribuições são bem-vindos em [Issues](../../issues).
 
 ## Apoie
 
@@ -169,18 +163,17 @@ the **HDMI input**.
 - **Any HDMI port** is detected automatically through Android's TV input framework;
   the preview follows the port where a device was just plugged in, and shows the device
   name via **HDMI-CEC**. The projector remote keeps controlling the HDMI device.
-- **No ads, no internet permission**, plus an ad-free **clock screensaver** to replace
-  manufacturer screensavers that show video ads.
+- **No ads, no internet permission.** An idle **clock** (moving every minute to avoid
+  burn-in) shows up before manufacturer screensavers that play video ads.
 - Configurable tiles (AirPlay, Miracast, Files, Settings), Wi-Fi indicator, app drawer.
 
 **Tested on the HY320 projector (Magcubic, Allwinner H713, Android 11).** Other
 Allwinner projectors (HY300, L018…) should behave the same; other devices with HDMI
 inputs open HDMI in Cineluz's own full-screen player. Requires Android 7.0+, no root.
 
-Install: download the APK from [Releases](../../releases), then
-`adb install cineluz-launcher-1.0.0.apk` and
-`adb shell cmd package set-home-activity com.elisson.cineluz/.HomeActivity`.
-Uninstall with `adb uninstall com.elisson.cineluz` to go back to the stock launcher.
+**Install:** [download the APK](https://github.com/eacarva/cineluz-launcher/releases/latest/download/cineluz-launcher.apk),
+open it on the projector (allow unknown sources if asked), open Cineluz and confirm it
+as the home app. To go back, uninstall it from Settings → Apps.
 
 The app UI is currently in Brazilian Portuguese; translations are welcome.
 

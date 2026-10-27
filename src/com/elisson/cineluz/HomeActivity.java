@@ -45,7 +45,12 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     private static final String PREF_LAST_BOOT = "last_boot_count";
     private static final String PREF_HDMI_PORT = "hdmi_port";
 
+    private static final String PREF_ASKED_HOME = "asked_home";
+    private static final String PREF_ASKED_LOCATION = "asked_location";
+
     private static final int REQUEST_PICK_APP = 1;
+    private static final int REQUEST_HOME_ROLE = 2;
+    private static final int REQUEST_LOCATION = 3;
 
     // Medidas pensadas para tela 1920x1080; o resto é escalado
     private static final int GRID_LEFT = 206;
@@ -70,6 +75,10 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     private GradientDrawable switchTrack;
     private View switchKnob;
     private boolean resumed;
+    private View makeDefaultButton;
+    private long idleMs;
+    private final Runnable showIdleClock = () ->
+            startActivity(new Intent(this, IdleClockActivity.class));
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +106,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         int y1 = GRID_TOP, y2 = GRID_TOP + ROW_H + GAP;
         int wide = 742, narrow = (GRID_WIDTH - wide - 2 * GAP) / 2;
         int x = GRID_LEFT;
-        hdmiTile = addTile(root, x, y1, wide, R.drawable.ic_hdmi, getString(R.string.tile_hdmi),
+        hdmiTile = addTile(root, x, y1, wide, getDrawable(R.drawable.ic_hdmi), getString(R.string.tile_hdmi),
                 HDMI_START, HDMI_END, v -> openHdmi());
         hdmiLabel = (TextView) hdmiTile.getTag();
         hdmiTile.setOnLongClickListener(v -> {
@@ -117,14 +126,31 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         x += third + GAP;
         addSlotTile(root, TileSlot.SETTINGS, x, y2, third);
         x += third + GAP;
-        addTile(root, x, y2, third, R.drawable.ic_apps, getString(R.string.tile_apps),
+        addTile(root, x, y2, third, getDrawable(R.drawable.ic_apps), getString(R.string.tile_apps),
                 APPS_START, APPS_END, v -> startActivity(new Intent(this, AppsActivity.class)));
 
         addAutoHdmiSwitch(root, GRID_LEFT, y2 + ROW_H + 40);
         addSupportButton(root, GRID_LEFT + GRID_WIDTH - 72, y2 + ROW_H + 40);
+        addMakeDefaultButton(root, y2 + ROW_H + 40);
+
+        // Enquanto a tela inicial estiver aberta, a tela não apaga: depois do tempo
+        // de tela do sistema sem ninguém mexer, o Cineluz mostra o relógio dele
+        // (antes do descanso de tela do sistema, que em alguns aparelhos tem anúncios)
+        getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        long screenOff = Settings.System.getLong(getContentResolver(),
+                Settings.System.SCREEN_OFF_TIMEOUT, 5 * 60_000L);
+        idleMs = screenOff > 0 && screenOff < 24 * 60 * 60_000L ? Math.max(60_000L, screenOff - 15_000L) : 0;
 
         setContentView(root);
         hdmiTile.requestFocus();
+
+        // Primeira vez: oferece virar a tela inicial padrão
+        if (!isDefaultHome() && !prefs.getBoolean(PREF_ASKED_HOME, false)) {
+            prefs.edit().putBoolean(PREF_ASKED_HOME, true).apply();
+            handler.postDelayed(this::requestDefaultHome, 800);
+        } else {
+            maybeAskLocation();
+        }
     }
 
     @Override
@@ -135,6 +161,8 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         // Trava o mudo já na volta pra tela inicial: alguns apps de HDMI, ao
         // fechar, tiram o mudo por um instante e isso dava um "pico" de som
         preview.resume();
+        makeDefaultButton.setVisibility(isDefaultHome() ? View.GONE : View.VISIBLE);
+        resetIdleTimer();
         refreshPorts(false);
         if (!maybeOpenHdmiAfterBoot()) {
             handler.postDelayed(this::tuneCurrentPort, 400);
@@ -158,6 +186,17 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         // prévia (recupera a imagem se ela tiver sumido)
         hdmiTile.requestFocus();
         if (resumed) preview.restart();
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        resetIdleTimer();
+        return super.dispatchKeyEvent(event);
+    }
+
+    private void resetIdleTimer() {
+        handler.removeCallbacks(showIdleClock);
+        if (resumed && idleMs > 0) handler.postDelayed(showIdleClock, idleMs);
     }
 
     @Override
@@ -185,11 +224,63 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_HOME_ROLE) {
+            makeDefaultButton.setVisibility(isDefaultHome() ? View.GONE : View.VISIBLE);
+            maybeAskLocation();
+            return;
+        }
         if (requestCode != REQUEST_PICK_APP || resultCode != RESULT_OK || data == null) return;
         TileSlot slot = TileSlot.byKey(data.getStringExtra(AppsActivity.EXTRA_SLOT));
         if (slot == null) return;
         slot.setCustomPackage(this, data.getStringExtra(AppsActivity.EXTRA_PACKAGE));
         recreate();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(requestCode, permissions, results);
+        if (requestCode == REQUEST_LOCATION && resumed) {
+            networkChip.stop();
+            networkChip.start();
+        }
+    }
+
+    // ---------- Tela inicial padrão e permissões ----------
+
+    private boolean isDefaultHome() {
+        Intent home = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
+        android.content.pm.ResolveInfo ri = getPackageManager()
+                .resolveActivity(home, android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
+        return ri != null && ri.activityInfo != null && getPackageName().equals(ri.activityInfo.packageName);
+    }
+
+    /** Mostra a janela do Android para escolher o Cineluz como tela inicial. */
+    private void requestDefaultHome() {
+        if (android.os.Build.VERSION.SDK_INT >= 29) {
+            android.app.role.RoleManager rm = getSystemService(android.app.role.RoleManager.class);
+            if (rm != null && rm.isRoleAvailable(android.app.role.RoleManager.ROLE_HOME)) {
+                startActivityForResult(rm.createRequestRoleIntent(android.app.role.RoleManager.ROLE_HOME),
+                        REQUEST_HOME_ROLE);
+                return;
+            }
+        }
+        Intent settings = new Intent(Settings.ACTION_HOME_SETTINGS);
+        if (settings.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(settings, REQUEST_HOME_ROLE);
+        } else {
+            // Aparelhos antigos: o Android pergunta qual tela inicial usar
+            startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
+    }
+
+    /** Uma vez só: o Android exige a permissão de localização para ler o nome do Wi-Fi. */
+    private void maybeAskLocation() {
+        String perm = android.Manifest.permission.ACCESS_FINE_LOCATION;
+        if (checkSelfPermission(perm) == android.content.pm.PackageManager.PERMISSION_GRANTED) return;
+        if (prefs.getBoolean(PREF_ASKED_LOCATION, false)) return;
+        prefs.edit().putBoolean(PREF_ASKED_LOCATION, true).apply();
+        requestPermissions(new String[]{perm}, REQUEST_LOCATION);
     }
 
     // ---------- HDMI ----------
@@ -299,7 +390,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     // ---------- Blocos configuráveis ----------
 
     private void addSlotTile(FrameLayout root, TileSlot slot, int x, int y, int w) {
-        FrameLayout tile = addTile(root, x, y, w, slot.iconRes, slot.label(this),
+        FrameLayout tile = addTile(root, x, y, w, slot.icon(this), slot.label(this),
                 slot.colorStart, slot.colorEnd, v -> {
                     Intent intent = slot.intent(this);
                     if (intent != null) Launcher.start(this, intent); else pickApp(slot);
@@ -362,7 +453,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     }
 
     /** Bloco com degradê, ícone em cima e nome embaixo. O TextView do nome fica no tag. */
-    private FrameLayout addTile(FrameLayout root, int x, int y, int w, int iconRes, String label,
+    private FrameLayout addTile(FrameLayout root, int x, int y, int w, android.graphics.drawable.Drawable iconDrawable, String label,
                                 int colorStart, int colorEnd, View.OnClickListener onClick) {
         final FrameLayout tile = new FrameLayout(this);
         tile.setFocusable(true);
@@ -377,7 +468,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         tile.setClipToOutline(true);
 
         ImageView icon = new ImageView(this);
-        icon.setImageResource(iconRes);
+        icon.setImageDrawable(iconDrawable);
         icon.setScaleType(ImageView.ScaleType.FIT_START);
         FrameLayout.LayoutParams ilp = new FrameLayout.LayoutParams(px(96), px(96),
                 Gravity.TOP | Gravity.START);
@@ -479,6 +570,26 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
 
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(px(72), px(72));
         lp.leftMargin = px(x);
+        lp.topMargin = px(y);
+        root.addView(button, lp);
+    }
+
+    /** Aparece só enquanto o Cineluz não for a tela inicial padrão. */
+    private void addMakeDefaultButton(FrameLayout root, int y) {
+        TextView button = new TextView(this);
+        button.setText(R.string.make_default);
+        button.setTextColor(Color.WHITE);
+        button.setTextSize(TypedValue.COMPLEX_UNIT_PX, px(28));
+        button.setGravity(Gravity.CENTER);
+        button.setPadding(px(34), 0, px(34), 0);
+        button.setFocusable(true);
+        button.setClickable(true);
+        button.setOnClickListener(v -> requestDefaultHome());
+        Ui.pillBackground(button, unit);
+        makeDefaultButton = button;
+
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT, px(72), Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         lp.topMargin = px(y);
         root.addView(button, lp);
     }

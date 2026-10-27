@@ -3,6 +3,8 @@ package com.elisson.cineluz;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 
 /**
  * Os blocos configuráveis da tela inicial. Cada um tem um papel (espelhar
@@ -84,6 +86,18 @@ enum TileSlot {
         String custom = customPackage(ctx);
         if (custom != null && Launcher.isInstalled(ctx, custom)) return Launcher.appLabel(ctx, custom);
         return ctx.getString(labelRes);
+    }
+
+    /** Ícone do bloco: o do app escolhido pelo usuário, ou o ícone do papel. */
+    Drawable icon(Context ctx) {
+        String custom = customPackage(ctx);
+        if (custom != null && Launcher.isInstalled(ctx, custom)) {
+            try {
+                return ctx.getPackageManager().getApplicationIcon(custom);
+            } catch (PackageManager.NameNotFoundException ignored) {
+            }
+        }
+        return ctx.getDrawable(iconRes);
     }
 
     /** O que abrir ao apertar o bloco, ou null se não houver app para ele. */

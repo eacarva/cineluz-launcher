@@ -78,6 +78,13 @@
             android:exported="false" />
 
         <activity
+            android:name=".IdleClockActivity"
+            android:screenOrientation="landscape"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen"
+            android:exported="false" />
+
+        <activity
             android:name=".AboutActivity"
             android:screenOrientation="landscape"
             android:exported="false" />

@@ -11,6 +11,7 @@
     <string name="tile_apps">Apps</string>
 
     <string name="auto_hdmi">Abrir HDMI ao ligar</string>
+    <string name="make_default">Usar o Cineluz como tela inicial</string>
     <string name="hdmi_none">Nenhuma entrada HDMI encontrada</string>
     <string name="hdmi_single">Este aparelho tem só uma entrada HDMI</string>
     <string name="hdmi_no_signal">sem sinal</string>

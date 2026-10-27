@@ -5,6 +5,12 @@ esconde: as Configurações completas do Android, "Sobre o dispositivo" e as
 **Opções do desenvolvedor**. Serve para ligar a **depuração USB / ADB** em boxes
 travadas, onde tocar 7 vezes no "Número da versão" não funciona pelo menu de fábrica.
 
+Também abre a tela do **Google Play Services** e da **Play Store**, com o botão
+*Desativar/Ativar*: em boxes com pouca memória que não usam a Play Store, desativar o
+Play Services libera cerca de 180 MB (reative pelo mesmo botão quando precisar). Se o
+*Desativar* estiver bloqueado, primeiro desmarque o Play Services em *Administradores do
+dispositivo* (botão também incluído).
+
 Mostra só os botões das telas que existem no aparelho.
 
 ## Testado

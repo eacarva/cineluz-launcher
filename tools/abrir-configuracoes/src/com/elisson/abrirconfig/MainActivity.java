@@ -15,7 +15,8 @@ import android.widget.Toast;
 /**
  * Abre telas de configuração que o menu da box esconde: as Configurações
  * completas do Android, "Sobre o dispositivo" (tocar 7x no número da versão)
- * e as Opções do desenvolvedor (Depuração USB / ADB).
+ * e as Opções do desenvolvedor (Depuração USB / ADB). Também abre a tela dos
+ * serviços do Google, para desativá-los (liberar memória) ou reativá-los.
  */
 public class MainActivity extends Activity {
 
@@ -61,6 +62,15 @@ public class MainActivity extends Activity {
         addComponentButton(root, "Opções do desenvolvedor (tela direta de TV)",
                 new ComponentName(TV, TV + ".system.development.DevelopmentActivity"));
 
+        // Serviços do Google: a tela do app tem o botão Desativar/Ativar
+        // (na Play Store e apps do Google dependem do Play Services)
+        // O Play Services costuma ser "administrador do dispositivo" (Encontre meu
+        // dispositivo): enquanto for, o botão Desativar fica bloqueado
+        addComponentButton(root, "Administradores do dispositivo (liberar Desativar)",
+                new ComponentName(PHONE, PHONE + ".DeviceAdminSettings"));
+        addAppDetailsButton(root, "Google Play Services (ativar/desativar)", "com.google.android.gms");
+        addAppDetailsButton(root, "Play Store (ativar/desativar)", "com.android.vending");
+
         if (root.getChildCount() == 2) {
             TextView none = new TextView(this);
             none.setText("Nenhuma dessas telas existe neste aparelho.");
@@ -72,6 +82,22 @@ public class MainActivity extends Activity {
 
     private void addButton(LinearLayout root, String label, String action, String pkg) {
         addButton(root, label, new Intent(action).setPackage(pkg));
+    }
+
+    private void addAppDetailsButton(LinearLayout root, String label, String pkg) {
+        try {
+            // Também encontra apps desativados
+            getPackageManager().getApplicationInfo(pkg, android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS);
+        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+            return;
+        }
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                android.net.Uri.fromParts("package", pkg, null));
+        // Boxes com dois apps de configurações: abre direto as completas, sem perguntar
+        for (android.content.pm.ResolveInfo ri : getPackageManager().queryIntentActivities(intent, 0)) {
+            if (PHONE.equals(ri.activityInfo.packageName)) intent.setClassName(PHONE, ri.activityInfo.name);
+        }
+        addButton(root, label, intent);
     }
 
     private void addComponentButton(LinearLayout root, String label, ComponentName cn) {

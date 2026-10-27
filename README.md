@@ -2,137 +2,187 @@
   <img src="docs/icon.svg" alt="Ícone do Cineluz Launcher: uma lente que projeta um feixe de luz âmbar numa tela" width="120">
 </p>
 
-# Cineluz Launcher — launcher para projetor Android com HDMI em primeiro lugar
+# Cineluz Launcher — launcher leve e sem anúncios para projetor Android e TV box
 
-**Cineluz Launcher** é uma tela inicial (launcher) gratuita e de código aberto para
-**projetores Android** e TV boxes, feita para quem usa o projetor principalmente pela
-**entrada HDMI**. Ele mostra uma **prévia ao vivo e sem som do HDMI** na tela inicial,
-pode **abrir direto no HDMI ou no seu app principal ao ligar**, não tem **nenhum anúncio** e não acessa a
-internet. Foi criado e testado no **projetor HY320 (Magcubic, Allwinner H713,
-Android 11)** e funciona em outros projetores e TV boxes com Android 7 ou mais novo.
+**Cineluz Launcher** é uma tela inicial (launcher) **gratuita, de código aberto e sem
+anúncios** para **projetores Android** e **TV boxes Android**. Em projetores, ele coloca a
+**entrada HDMI em primeiro lugar**, com uma prévia ao vivo e sem som. Em TV boxes, o bloco
+grande vira o seu **app principal**, que pode **abrir sozinho ao ligar**, inclusive quando a
+box só sai do modo de espera. Tem cerca de **76 KB**, não acessa a internet e foi testado
+no **projetor HY320** (Magcubic, Allwinner H713, Android 11) e na **TV box UniTV S1**
+(Rockchip RK322x, Android 7.1.2).
+
+**[⬇️ Baixar o Cineluz Launcher (APK)](https://github.com/eacarva/cineluz-launcher/releases/latest/download/cineluz-launcher.apk)**
+— ou digite **`is.gd/cineluz`** no navegador da TV box ou do projetor.
 
 ![Tela inicial do Cineluz Launcher no projetor HY320, com o bloco HDMI em destaque](docs/screenshot-home.png)
 
-> 🇬🇧 **English:** Cineluz Launcher is a free, open-source, ad-free **home screen for
-> Android projectors** (tested on the **HY320 / Magcubic, Allwinner H713**) that puts the
-> **HDMI input first**: live muted HDMI preview on the home screen, auto-open HDMI on
-> boot, any HDMI port detected automatically. [Read in English ↓](#english)
+> 🇬🇧 **English:** Cineluz Launcher is a free, open-source, ad-free, ~76 KB **home screen
+> for Android projectors and Android TV boxes**. Tested on the **HY320 projector** and the
+> **UniTV S1 TV box**. [Read in English ↓](#english)
+
+## Em resumo
+
+| | |
+|---|---|
+| **O que é** | Launcher (tela inicial) para projetor Android e TV box Android |
+| **Preço** | Gratuito, código aberto (Apache 2.0), sem anúncios |
+| **Tamanho** | ~76 KB |
+| **Internet** | Não usa: o app não tem permissão de internet |
+| **Android** | 7.0 ou mais novo, sem root |
+| **Testado em** | Projetor **HY320** (Android 11) e TV box **UniTV S1** (Android 7.1.2) |
+| **Instalar** | Baixar o APK em `is.gd/cineluz`, instalar e escolher como tela inicial |
 
 ## Por que usar
 
-Muitos projetores Android baratos (HY300, HY320, L018 e parecidos) vêm com um launcher
-de fábrica **cheio de anúncios**, com o HDMI escondido no meio de atalhos que você não
-usa, e às vezes com um **descanso de tela que mostra propaganda em vídeo**. Launchers
-alternativos de Android TV costumam **não mostrar a entrada HDMI** ou travar ao trocar
-para ela. O Cineluz resolve exatamente isso:
+Projetores e TV boxes baratos costumam vir com um launcher de fábrica **pesado, lento e
+cheio de anúncios**, às vezes com **propaganda em vídeo no descanso de tela**. Launchers
+alternativos de Android TV costumam não mostrar a entrada HDMI ou não abrir nada sozinhos
+quando a box liga. O Cineluz resolve isso:
 
-- **Bloco HDMI ao vivo e mudo** — veja na tela inicial o que está passando no aparelho
-  ligado ao HDMI (TV box, videogame, Fire TV, Chromecast…), sem som. OK abre em tela cheia.
-- **Abrir o HDMI ou um app ao ligar** — liga o projetor e ele vai direto para a entrada
-  HDMI, ou para o app que você escolher (YouTube, IPTV, Netflix…). Opcional, numa chave
-  na própria tela inicial.
-- **TV box sem HDMI** — o bloco grande vira o seu **app principal**, que também pode
-  abrir sozinho ao ligar.
-- **Qualquer porta HDMI** — as portas são detectadas sozinhas; ligue um aparelho em
-  outra porta e a prévia muda para ela. Mostra até o nome do aparelho via **HDMI-CEC**.
-- **O controle remoto do projetor continua comandando o aparelho no HDMI** (HDMI-CEC).
-- **Sem anúncios, sem internet** — o app nem tem permissão de acesso à internet.
-- **Relógio por inatividade** — aparece antes do descanso de tela do fabricante (que em
-  alguns projetores mostra propaganda em vídeo) e muda de lugar para não marcar a imagem.
-- **Blocos configuráveis** — AirPlay (AirPin), Miracast, Arquivos e Configurações já
-  vêm apontando para os apps certos do aparelho; qualquer bloco pode abrir outro app.
+- **Abre sozinho ao ligar** — o HDMI ou o app que você escolher, no botão **Ao ligar ⌄**
+  da tela inicial. Funciona quando o aparelho reinicia **e quando a TV box só sai do modo
+  de espera** pelo controle (caso da UniTV S1, que nem reinicia ao "desligar").
+- **App principal em TV boxes** — sem entrada HDMI, o bloco grande vira o app que você
+  mais usa. Na primeira vez, o Cineluz já pergunta qual é.
+- **Bloco HDMI ao vivo e mudo** (projetores) — veja o que está passando no aparelho ligado
+  ao HDMI sem sair da tela inicial. OK abre em tela cheia, e o controle do projetor
+  continua comandando o aparelho pelo **HDMI-CEC**.
+- **Qualquer porta HDMI** — detectada sozinha, com o nome do aparelho via HDMI-CEC.
+- **Sem anúncios** — e um **relógio por inatividade** que aparece antes do descanso de tela
+  do fabricante e muda de lugar para não marcar a imagem do projetor.
+- **Blocos configuráveis** — AirPlay, Miracast, Arquivos e Configurações já apontam para os
+  apps do aparelho; segure OK para escolher outro. Os ícones seguem o mesmo estilo, sem
+  aqueles ícones coloridos e desencontrados dos apps.
+- **Ferramentas da box** — em *Sobre*: abre as **Opções do desenvolvedor** escondidas
+  (para ligar o **ADB**), desativa ou reativa os **serviços do Google** para liberar
+  memória e mostra um **diagnóstico de energia**.
 - **Indicador de Wi-Fi** — mostra a rede e o sinal; um clique abre a lista de redes.
-- **Levíssimo** — cerca de 50 KB (o launcher de fábrica do HY320 tem ~21 MB).
 
-## Compatibilidade
+## Mais leve e mais rápido que o launcher de fábrica
+
+Medições feitas nos próprios aparelhos, pelo ADB:
+
+| Aparelho | | Cineluz | Launcher de fábrica |
+|---|---|---|---|
+| **TV box UniTV S1** (1 GB de RAM) | Abrir a tela inicial | **0,7 s** | 2,5 s |
+| | Memória do launcher | **8 a 13 MB** | 31 MB |
+| | Processador parado | **0%** | ~2% |
+| **Projetor HY320** (1 GB de RAM) | Memória do launcher | **~36 MB** (com a prévia HDMI) | ~87 MB |
+| | Processador ao abrir | **~0%** | 70 a 184% (vídeos e anúncios) |
+| | Tamanho do app | **~76 KB** | ~21 MB |
+
+## Aparelhos testados
 
 | Aparelho | Situação |
 |---|---|
-| **Projetor HY320** (Magcubic, Allwinner H713, Android 11) | ✅ Testado: HDMI ao vivo e mudo, abrir HDMI ao ligar, HDMI-CEC |
-| **HY300, L018 e outros projetores Allwinner** | Deve funcionar igual (mesmo app de HDMI e mesmos ajustes de som) — [conte como foi](../../issues) |
-| Outros projetores / TVs Android com entrada HDMI | HDMI abre na tela cheia do próprio Cineluz |
-| TV box sem entrada HDMI (Mi Box, Fire TV, genéricas) | Funciona: o bloco grande vira o app principal, que pode abrir ao ligar |
-
-Requer **Android 7.0 ou mais novo**. Não precisa de root.
+| **TV box UniTV S1** (Rockchip RK322x, Android 7.1.2) | ✅ App principal abrindo sozinho ao ligar e ao sair do modo de espera, blocos já configurados (App Market, Miracast, Explorer, Configurações de TV), ADB ligado pelas Ferramentas da box |
+| **Projetor HY320** (Magcubic, Allwinner H713, Android 11) | ✅ HDMI ao vivo e mudo, HDMI abrindo sozinho ao ligar, HDMI-CEC, sem anúncios |
+| **HY300, L018 e outros projetores Allwinner** | Deve funcionar igual ao HY320 — [conte como foi](../../issues) |
+| **Outras TV boxes Rockchip / Amlogic** | Deve funcionar como na UniTV S1 — [conte como foi](../../issues) |
+| Outros projetores e TVs Android com HDMI | HDMI abre na tela cheia do próprio Cineluz |
+| Mi Box, Fire TV e TV boxes genéricas | Funciona como launcher com app principal |
 
 ## Como instalar
 
-1. **Baixe o APK** — no próprio projetor (pelo navegador ou pelo app *Downloader*) ou
-   no celular/computador para passar por pendrive:
+1. **Baixe o APK** — no navegador da TV box ou do projetor, digite **`is.gd/cineluz`**
+   (ou use o app *Downloader*). Também dá para baixar no computador e passar por pendrive:
 
    **[⬇️ Baixar o Cineluz Launcher](https://github.com/eacarva/cineluz-launcher/releases/latest/download/cineluz-launcher.apk)**
 
-2. **Instale** — abra o arquivo baixado. Se o Android pedir, permita instalar apps
-   desse app (*fontes desconhecidas*).
-3. **Abra o Cineluz** e confirme quando ele perguntar se deve ser a **tela inicial**.
+2. **Instale** — abra o arquivo baixado. Se o Android pedir, permita instalar apps desse
+   navegador ou gerenciador de arquivos (*fontes desconhecidas*).
+3. **Abra o Cineluz.** Numa TV box, ele pergunta primeiro qual é o **app principal**.
+   Depois, confirme o Cineluz como **tela inicial**, escolhendo **Sempre**.
 
-Pronto. Ele também pede, uma vez, a permissão de localização — o Android só deixa um
-app ler o **nome da rede Wi-Fi** com ela. Pode recusar sem problema.
+O link `is.gd/cineluz` sempre leva à versão mais nova. Para atualizar, é só instalar por
+cima: as suas escolhas continuam.
 
 ### Desinstalar
 
-*Configurações → Apps → Cineluz Launcher → Desinstalar.* O projetor volta sozinho
-para a tela inicial de fábrica.
+*Configurações → Apps → Cineluz Launcher → Desinstalar.* O aparelho volta sozinho para a
+tela inicial de fábrica.
 
 ## Como usar
 
 | No controle | O que acontece |
 |---|---|
-| **OK** no bloco HDMI | Abre a entrada HDMI em tela cheia |
-| **Segurar OK** (ou **Menu**) no bloco HDMI | Passa para a próxima porta HDMI |
+| **OK** no bloco grande | Abre o HDMI (projetor) ou o app principal (TV box) |
+| **Segurar OK** (ou **Menu**) no bloco grande | Troca a porta HDMI (projetor) ou o app principal (TV box) |
 | **Segurar OK** (ou **Menu**) em AirPlay, Miracast, Arquivos ou Configurações | Escolher o app daquele bloco |
-| **Home** na tela inicial | Reinicia a prévia do HDMI (se a imagem sumir) |
 | Botão **Ao ligar ⌄** (ex.: *HDMI ⌄*) | Escolher o que abrir ao ligar: HDMI ou um app |
-| Chave verde/vermelha ao lado | Liga/desliga a abertura automática ao ligar o aparelho |
-| **OK** / **Segurar OK** no bloco grande (aparelho sem HDMI) | Abre o app principal / troca o app |
-| Símbolo do Cineluz no canto inferior direito | Sobre o Cineluz, **Ferramentas da box** e como apoiar o projeto |
+| Chave verde/vermelha ao lado | Liga/desliga a abertura automática |
+| Símbolo do Cineluz no canto inferior direito | **Sobre**: Ferramentas da box e como apoiar o projeto |
+| **Home** na tela inicial | Volta o foco ao bloco grande e reinicia a prévia do HDMI |
 
-Se ninguém mexer no controle por alguns minutos na tela inicial, aparece um **relógio**
-que muda de lugar a cada minuto (para não marcar a imagem). Qualquer tecla volta.
+Se ninguém mexer no controle por alguns minutos, aparece um **relógio** que muda de lugar
+a cada minuto. Qualquer tecla volta.
+
+<p align="center">
+  <img src="docs/screenshot-sobre.png" alt="Tela Sobre do Cineluz Launcher na TV box UniTV S1, com Ferramentas da box e QR code de apoio" width="49%">
+  <img src="docs/screenshot-ferramentas.png" alt="Ferramentas da box do Cineluz Launcher: ligar o ADB e desativar os serviços do Google" width="49%">
+</p>
 
 ## Perguntas frequentes
 
-**Como tirar os anúncios do projetor HY320 (ou HY300)?**
-Os anúncios vêm do launcher de fábrica e do descanso de tela dele. Instale o Cineluz e
-escolha-o como tela inicial: a tela de fábrica sai de cena e, quando o projetor fica
-parado, aparece o relógio do Cineluz no lugar do descanso de tela com propaganda.
-Não precisa trocar o firmware, fazer root nem usar computador.
+### Qual o melhor launcher para a TV box UniTV S1?
+O Cineluz foi testado na UniTV S1 e, medido na própria box, abre a tela inicial em 0,7 s
+contra 2,5 s do launcher de fábrica, usando cerca de um quarto da memória. Ele já vem com
+os blocos certos para ela (App Market, Miracast, Explorer e Configurações de TV) e abre o
+app principal sozinho quando a box sai do modo de espera.
 
-**Como fazer o projetor Android abrir direto no HDMI ao ligar?**
-Com o Cineluz como tela inicial, deixe *Ao ligar* em *HDMI* e a chave verde. Na
-primeira vez que a tela inicial aparece depois de ligar, ele abre a entrada HDMI
-que tem sinal.
+### Como trocar o launcher da TV box ou do projetor Android?
+Instale o Cineluz pelo APK (`is.gd/cineluz`), abra e confirme quando ele perguntar se deve
+ser a **tela inicial**, escolhendo **Sempre**. Para voltar ao de fábrica, desinstale o
+Cineluz em *Configurações → Apps*.
 
-**Como fazer a TV box ou o projetor abrir um app sozinho ao ligar?**
-Na barra *Ao ligar*, aperte OK no botão com a setinha (*HDMI ⌄*) e escolha o app (por
-exemplo YouTube ou o app de IPTV). Para trocar depois, é só repetir. Com a chave verde, o
-app abre sozinho depois de ligar.
+### Como fazer a TV box abrir um app sozinho ao ligar?
+Na tela inicial do Cineluz, aperte OK no botão **Ao ligar ⌄**, escolha o app e deixe a
+chave verde. O app abre sozinho quando a box liga. Funciona também em boxes que não
+desligam de verdade e só entram em modo de espera pelo controle, como a UniTV S1.
 
-**Por que outros launchers (Projectivy, FLauncher) não mostram ou travam o HDMI?**
-No HY320 e em outros projetores Allwinner, o HDMI é aberto por um app do fabricante
-que precisa receber qual entrada abrir. Launchers genéricos abrem esse app sem essa
-informação (ou nem o enxergam, porque ele não aparece como app comum). O Cineluz abre
-do mesmo jeito que o launcher de fábrica e, em outros aparelhos, usa a entrada HDMI
-direto pelo sistema de TV do Android.
+### Como fazer o projetor Android abrir direto no HDMI ao ligar?
+Deixe **Ao ligar** em **HDMI** e a chave verde. Na primeira vez que a tela inicial aparece
+depois de ligar, o Cineluz abre a entrada HDMI que tem sinal.
 
-**O controle do projetor continua funcionando no aparelho ligado ao HDMI?**
-Sim. O repasse das teclas (HDMI-CEC) é feito pelo sistema do projetor, e o Cineluz
-abre o HDMI da mesma forma que o launcher original.
+### Como tirar os anúncios do projetor HY320 (ou HY300)?
+Os anúncios vêm do launcher de fábrica e do descanso de tela dele. Com o Cineluz como tela
+inicial, a tela de fábrica sai de cena e, quando o projetor fica parado, aparece o relógio
+do Cineluz no lugar da propaganda. Não precisa trocar o firmware, fazer root nem usar
+computador.
 
-**Por que a prévia do HDMI fica sem som?**
-De propósito: a tela inicial fica silenciosa. Ao abrir o HDMI, o som volta normalmente.
+### Como ativar o modo desenvolvedor e o ADB numa TV box travada (como a UniTV S1)?
+Em algumas boxes, tocar 7 vezes em "Número da versão" não funciona pelo menu de fábrica.
+No Cineluz, abra **Sobre → Ferramentas da box → Abrir as Opções do desenvolvedor**: ele
+encontra a tela escondida e, lá dentro, você liga a *Depuração USB* e o ADB pela rede. Na
+UniTV S1, a opção de rede se chama **"Internet Adb"**.
 
-**Funciona em TV box, Fire TV ou Android TV sem entrada HDMI?**
-Sim. Sem entrada HDMI, o bloco grande vira o **app principal**: na primeira vez ele
-pede para escolher o app, e depois OK abre esse app. Ele também pode abrir sozinho ao
-ligar a box.
+### Como liberar memória numa TV box com 1 GB de RAM?
+Só o Google Play Services ocupa cerca de 180 MB numa box assim. Se você não usa a Play
+Store nem apps do Google, em **Sobre → Ferramentas da box** o Cineluz guia como desativar
+os serviços do Google — e como reativar depois, pelo mesmo botão.
 
-**Ele coleta dados ou precisa de internet?**
-Não. O Cineluz não tem permissão de internet. As permissões usadas são: ajustes de
-áudio (deixar a prévia muda), estado da rede/Wi-Fi (indicador de rede) e,
-opcionalmente, localização (o Android só deixa ler o nome do Wi-Fi com ela).
+### Por que outros launchers (Projectivy, FLauncher) não mostram ou travam o HDMI?
+No HY320 e em outros projetores Allwinner, o HDMI é aberto por um app do fabricante que
+precisa receber qual entrada abrir. Launchers genéricos abrem esse app sem essa
+informação, ou nem o enxergam. O Cineluz abre do mesmo jeito que o launcher de fábrica e,
+em outros aparelhos, usa a entrada HDMI direto pelo sistema de TV do Android.
 
-**Preciso de computador, root ou firmware modificado?**
+### O controle do projetor continua funcionando no aparelho ligado ao HDMI?
+Sim. O repasse das teclas (HDMI-CEC) é feito pelo sistema do projetor, e o Cineluz abre o
+HDMI da mesma forma que o launcher original.
+
+### Por que a TV também desliga quando desligo a TV box?
+É o **HDMI-CEC** (na LG, *SimpLink*): ao entrar em modo de espera, a box avisa a TV, que
+desliga junto, e ao ligar a box a TV liga junto. Não tem relação com o Cineluz e pode ser
+desativado nas configurações da TV.
+
+### Ele coleta dados ou precisa de internet?
+Não. O Cineluz não tem permissão de internet. As permissões usadas são: ajustes de áudio
+(deixar a prévia do HDMI muda), estado da rede e do Wi-Fi (indicador de rede) e,
+opcionalmente, localização — o Android só deixa ler o nome do Wi-Fi com ela.
+
+### Preciso de computador, root ou firmware modificado?
 Não. É um app comum: baixe, instale e escolha como tela inicial. Dá para desinstalar a
 qualquer momento.
 
@@ -147,14 +197,12 @@ Compila sem Gradle — só o JDK 11+ e o Android SDK (`build-tools` 34+ e
 ```
 
 Cada push compila o APK no GitHub Actions; cada tag `v*` publica uma versão assinada em
-Releases. Em aparelhos que deixam escolher o descanso de tela, o Cineluz também oferece
-o *Relógio do Cineluz* como descanso de tela do sistema. Relatos de outros aparelhos e
-contribuições são bem-vindos em [Issues](../../issues).
+Releases. Em aparelhos que deixam escolher o descanso de tela, o Cineluz também oferece o
+*Relógio do Cineluz* como descanso de tela do sistema. Ajustes de fábrica por aparelho
+ficam em `DeviceDefaults.java`. Relatos de outros aparelhos e contribuições são
+bem-vindos em [Issues](../../issues).
 
-Box travada, sem como ligar o ADB pelo menu? Em **Sobre → Ferramentas da box**, o
-Cineluz abre as Opções do desenvolvedor escondidas (testado na UniTV S1), desativa ou
-reativa os serviços do Google para liberar memória e mostra um diagnóstico de energia.
-Para boxes sem o Cineluz, as mesmas ferramentas existem como app separado:
+As Ferramentas da box também existem como app separado, para boxes sem o Cineluz:
 [Abrir Configurações](tools/abrir-configuracoes/).
 
 ## Apoie
@@ -176,27 +224,28 @@ Obrigado! 🙏
 
 ## English
 
-**Cineluz Launcher** is a free, open-source, lightweight (~50 KB) **Android launcher
-for projectors** and TV boxes, built for people who mainly use their projector through
-the **HDMI input**.
+**Cineluz Launcher** is a free, open-source, ad-free, lightweight (~76 KB) **launcher
+(home screen) for Android projectors and Android TV boxes**.
 
-- **Live, muted HDMI preview** on the home screen; press OK to open HDMI full screen.
-- **Auto-open HDMI or any app on boot** (the *Ao ligar ⌄* button picks what to open; the
-  toggle next to it turns it on/off). On TV boxes without HDMI, the big tile becomes your **main app**.
-- **Any HDMI port** is detected automatically through Android's TV input framework;
-  the preview follows the port where a device was just plugged in, and shows the device
-  name via **HDMI-CEC**. The projector remote keeps controlling the HDMI device.
-- **No ads, no internet permission.** An idle **clock** (moving every minute to avoid
-  burn-in) shows up before manufacturer screensavers that play video ads.
-- Configurable tiles (AirPlay, Miracast, Files, Settings), Wi-Fi indicator, app drawer.
+- **Opens your main app or HDMI automatically** when the device turns on — including TV
+  boxes that only wake from standby with the remote (like the UniTV S1).
+- **Main-app tile on TV boxes** without HDMI; asks for it on first launch.
+- **Live, muted HDMI preview** on projectors; OK opens HDMI full screen, and the remote
+  keeps controlling the HDMI device through **HDMI-CEC**. Any HDMI port is detected.
+- **No ads, no internet permission.** An idle **clock** that moves every minute (no
+  burn-in) shows up before manufacturer screensavers with video ads.
+- **Box tools** (in *About*): open hidden **Developer options** to enable **ADB**,
+  disable/re-enable **Google services** to free memory on 1 GB boxes, power diagnostics.
+- Configurable tiles with matching icons, Wi-Fi indicator, app drawer.
 
-**Tested on the HY320 projector (Magcubic, Allwinner H713, Android 11).** Other
-Allwinner projectors (HY300, L018…) should behave the same; other devices with HDMI
-inputs open HDMI in Cineluz's own full-screen player. Requires Android 7.0+, no root.
+**Tested on:** the **UniTV S1** TV box (Rockchip RK322x, Android 7.1.2) — home screen in
+0.7 s vs 2.5 s for the stock launcher, about a quarter of the memory — and the **HY320
+projector** (Magcubic, Allwinner H713, Android 11). Requires Android 7.0+, no root.
 
-**Install:** [download the APK](https://github.com/eacarva/cineluz-launcher/releases/latest/download/cineluz-launcher.apk),
-open it on the projector (allow unknown sources if asked), open Cineluz and confirm it
-as the home app. To go back, uninstall it from Settings → Apps.
+**Install:** type **`is.gd/cineluz`** in the device's browser (or
+[download the APK](https://github.com/eacarva/cineluz-launcher/releases/latest/download/cineluz-launcher.apk)),
+install it (allow unknown sources if asked), open Cineluz and set it as the home app
+(*Always*). To go back, uninstall it from Settings → Apps.
 
 The app UI is currently in Brazilian Portuguese; translations are welcome.
 

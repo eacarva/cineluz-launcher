@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/icon.svg" alt="Ícone do Cineluz Launcher: uma lente que projeta um feixe de luz âmbar numa tela" width="120">
+</p>
+
 # Cineluz Launcher — launcher para projetor Android com HDMI em primeiro lugar
 
 **Cineluz Launcher** é uma tela inicial (launcher) gratuita e de código aberto para

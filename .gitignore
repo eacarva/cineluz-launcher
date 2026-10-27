@@ -1,0 +1,7 @@
+build/
+.DS_Store
+
+# Chaves de assinatura nunca vão para o repositório
+*.keystore
+*.jks
+*.p12

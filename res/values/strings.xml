@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cineluz Launcher</string>
+    <string name="dream_name">Relógio do Cineluz</string>
+
+    <string name="tile_hdmi">HDMI</string>
+    <string name="tile_airplay">AirPlay</string>
+    <string name="tile_miracast">Miracast</string>
+    <string name="tile_files">Arquivos</string>
+    <string name="tile_settings">Configurações</string>
+    <string name="tile_apps">Apps</string>
+
+    <string name="auto_hdmi">Abrir HDMI ao ligar</string>
+    <string name="hdmi_none">Nenhuma entrada HDMI encontrada</string>
+    <string name="hdmi_single">Este aparelho tem só uma entrada HDMI</string>
+    <string name="hdmi_no_signal">sem sinal</string>
+
+    <string name="pick_title">Escolha o app do bloco \"%1$s\"</string>
+    <string name="pick_automatic">Automático</string>
+
+    <string name="net_ethernet">Cabo de rede</string>
+    <string name="net_none">Sem rede  ·  Conectar</string>
+    <string name="net_connected">conectado</string>
+
+    <string name="cant_open">Não consegui abrir</string>
+
+    <string name="about_title">Sobre o Cineluz</string>
+    <string name="about_version">Versão %1$s</string>
+    <string name="about_tagline">Tela inicial para projetores Android, com o HDMI em primeiro lugar.</string>
+    <string name="about_project_url">github.com/eacarva/cineluz-launcher</string>
+    <string name="donate_text">Gostou? Se quiser apoiar o projeto, aponte a câmera do celular:</string>
+    <!-- Vazio = sem seção de apoio na tela Sobre. O QR (drawable donate_qr) leva a esta página,
+         onde fica o PIX — assim, se a chave mudar, só o README precisa ser atualizado. -->
+    <string name="donate_url" translatable="false">github.com/eacarva/cineluz-launcher#apoie</string>
+</resources>

@@ -28,13 +28,16 @@ import java.util.Map;
 
 /**
  * Lista de todos os apps instalados. Também serve para escolher o app de um
- * bloco da tela inicial (quando aberta com {@link #EXTRA_SLOT}).
+ * bloco da tela inicial ou o que abrir ao ligar (quando aberta com {@link #EXTRA_SLOT}).
  */
 public class AppsActivity extends Activity {
 
     static final String EXTRA_SLOT = "slot";
     static final String EXTRA_TITLE = "title";
     static final String EXTRA_PACKAGE = "package";
+    // Item opcional no início da lista de escolha (ex.: "Automático", "HDMI"), que devolve pacote null
+    static final String EXTRA_FIRST_LABEL = "first_label";
+    static final String EXTRA_FIRST_ICON = "first_icon";
 
     private static class App {
         String label;
@@ -55,12 +58,13 @@ public class AppsActivity extends Activity {
         boolean picking = slotKey != null;
 
         final List<App> apps = loadApps();
-        if (picking) {
-            App auto = new App();
-            auto.label = getString(R.string.pick_automatic);
-            auto.icon = getDrawable(TileSlot.byKey(slotKey).iconRes);
-            apps.add(0, auto);
-        } else {
+        String firstLabel = getIntent().getStringExtra(EXTRA_FIRST_LABEL);
+        if (picking && firstLabel != null) {
+            App first = new App();
+            first.label = firstLabel;
+            first.icon = getDrawable(getIntent().getIntExtra(EXTRA_FIRST_ICON, R.drawable.ic_apps));
+            apps.add(0, first);
+        } else if (!picking) {
             App about = new App();
             about.label = getString(R.string.about_title);
             about.icon = getDrawable(R.drawable.app_icon);

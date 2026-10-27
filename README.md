@@ -7,7 +7,7 @@
 **Cineluz Launcher** é uma tela inicial (launcher) gratuita e de código aberto para
 **projetores Android** e TV boxes, feita para quem usa o projetor principalmente pela
 **entrada HDMI**. Ele mostra uma **prévia ao vivo e sem som do HDMI** na tela inicial,
-pode **abrir direto no HDMI ao ligar**, não tem **nenhum anúncio** e não acessa a
+pode **abrir direto no HDMI ou no seu app principal ao ligar**, não tem **nenhum anúncio** e não acessa a
 internet. Foi criado e testado no **projetor HY320 (Magcubic, Allwinner H713,
 Android 11)** e funciona em outros projetores e TV boxes com Android 7 ou mais novo.
 
@@ -28,8 +28,11 @@ para ela. O Cineluz resolve exatamente isso:
 
 - **Bloco HDMI ao vivo e mudo** — veja na tela inicial o que está passando no aparelho
   ligado ao HDMI (TV box, videogame, Fire TV, Chromecast…), sem som. OK abre em tela cheia.
-- **Abrir o HDMI ao ligar** — liga o projetor e ele vai direto para a entrada HDMI
-  (opcional, numa chave na própria tela inicial).
+- **Abrir o HDMI ou um app ao ligar** — liga o projetor e ele vai direto para a entrada
+  HDMI, ou para o app que você escolher (YouTube, IPTV, Netflix…). Opcional, numa chave
+  na própria tela inicial.
+- **TV box sem HDMI** — o bloco grande vira o seu **app principal**, que também pode
+  abrir sozinho ao ligar.
 - **Qualquer porta HDMI** — as portas são detectadas sozinhas; ligue um aparelho em
   outra porta e a prévia muda para ela. Mostra até o nome do aparelho via **HDMI-CEC**.
 - **O controle remoto do projetor continua comandando o aparelho no HDMI** (HDMI-CEC).
@@ -48,7 +51,7 @@ para ela. O Cineluz resolve exatamente isso:
 | **Projetor HY320** (Magcubic, Allwinner H713, Android 11) | ✅ Testado: HDMI ao vivo e mudo, abrir HDMI ao ligar, HDMI-CEC |
 | **HY300, L018 e outros projetores Allwinner** | Deve funcionar igual (mesmo app de HDMI e mesmos ajustes de som) — [conte como foi](../../issues) |
 | Outros projetores / TVs Android com entrada HDMI | HDMI abre na tela cheia do próprio Cineluz |
-| TV box sem entrada HDMI (Mi Box, Fire TV, genéricas) | Funciona como launcher simples, sem o bloco HDMI ao vivo |
+| TV box sem entrada HDMI (Mi Box, Fire TV, genéricas) | Funciona: o bloco grande vira o app principal, que pode abrir ao ligar |
 
 Requer **Android 7.0 ou mais novo**. Não precisa de root.
 
@@ -79,7 +82,9 @@ para a tela inicial de fábrica.
 | **Segurar OK** (ou **Menu**) no bloco HDMI | Passa para a próxima porta HDMI |
 | **Segurar OK** (ou **Menu**) em AirPlay, Miracast, Arquivos ou Configurações | Escolher o app daquele bloco |
 | **Home** na tela inicial | Reinicia a prévia do HDMI (se a imagem sumir) |
-| Chave **Abrir HDMI ao ligar** | Liga/desliga a abertura automática do HDMI |
+| Botão **Ao ligar ⌄** (ex.: *HDMI ⌄*) | Escolher o que abrir ao ligar: HDMI ou um app |
+| Chave verde/vermelha ao lado | Liga/desliga a abertura automática ao ligar o aparelho |
+| **OK** / **Segurar OK** no bloco grande (aparelho sem HDMI) | Abre o app principal / troca o app |
 | Símbolo do Cineluz no canto inferior direito | Sobre o Cineluz e como apoiar o projeto |
 
 Se ninguém mexer no controle por alguns minutos na tela inicial, aparece um **relógio**
@@ -94,9 +99,14 @@ parado, aparece o relógio do Cineluz no lugar do descanso de tela com propagand
 Não precisa trocar o firmware, fazer root nem usar computador.
 
 **Como fazer o projetor Android abrir direto no HDMI ao ligar?**
-Com o Cineluz como tela inicial, deixe ligada a chave *Abrir HDMI ao ligar*. Na
+Com o Cineluz como tela inicial, deixe *Ao ligar* em *HDMI* e a chave verde. Na
 primeira vez que a tela inicial aparece depois de ligar, ele abre a entrada HDMI
 que tem sinal.
+
+**Como fazer a TV box ou o projetor abrir um app sozinho ao ligar?**
+Na barra *Ao ligar*, aperte OK no botão com a setinha (*HDMI ⌄*) e escolha o app (por
+exemplo YouTube ou o app de IPTV). Para trocar depois, é só repetir. Com a chave verde, o
+app abre sozinho depois de ligar.
 
 **Por que outros launchers (Projectivy, FLauncher) não mostram ou travam o HDMI?**
 No HY320 e em outros projetores Allwinner, o HDMI é aberto por um app do fabricante
@@ -113,7 +123,9 @@ abre o HDMI da mesma forma que o launcher original.
 De propósito: a tela inicial fica silenciosa. Ao abrir o HDMI, o som volta normalmente.
 
 **Funciona em TV box, Fire TV ou Android TV sem entrada HDMI?**
-Funciona como um launcher simples e leve; só o bloco HDMI ao vivo não tem o que mostrar.
+Sim. Sem entrada HDMI, o bloco grande vira o **app principal**: na primeira vez ele
+pede para escolher o app, e depois OK abre esse app. Ele também pode abrir sozinho ao
+ligar a box.
 
 **Ele coleta dados ou precisa de internet?**
 Não. O Cineluz não tem permissão de internet. As permissões usadas são: ajustes de
@@ -163,7 +175,8 @@ for projectors** and TV boxes, built for people who mainly use their projector t
 the **HDMI input**.
 
 - **Live, muted HDMI preview** on the home screen; press OK to open HDMI full screen.
-- **Auto-open HDMI on boot** (optional toggle on the home screen).
+- **Auto-open HDMI or any app on boot** (the *Ao ligar ⌄* button picks what to open; the
+  toggle next to it turns it on/off). On TV boxes without HDMI, the big tile becomes your **main app**.
 - **Any HDMI port** is detected automatically through Android's TV input framework;
   the preview follows the port where a device was just plugged in, and shows the device
   name via **HDMI-CEC**. The projector remote keeps controlling the HDMI device.

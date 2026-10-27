@@ -10,7 +10,10 @@
     <string name="tile_settings">Configurações</string>
     <string name="tile_apps">Apps</string>
 
-    <string name="auto_hdmi">Abrir HDMI ao ligar</string>
+    <string name="auto_open">Ao ligar</string>
+    <string name="start_none">escolher app</string>
+    <string name="main_app_pick">Escolher app principal</string>
+    <string name="pick_start_title">O que abrir ao ligar o aparelho</string>
     <string name="make_default">Usar o Cineluz como tela inicial</string>
     <string name="hdmi_none">Nenhuma entrada HDMI encontrada</string>
     <string name="hdmi_single">Este aparelho tem só uma entrada HDMI</string>
@@ -28,7 +31,7 @@
     <string name="about_title">Sobre o Cineluz</string>
     <string name="support_button">Sobre o Cineluz e como apoiar</string>
     <string name="about_version">Versão %1$s</string>
-    <string name="about_tagline">Tela inicial para projetores Android, com o HDMI em primeiro lugar.</string>
+    <string name="about_tagline">Tela inicial para projetores e TV boxes Android: HDMI ou seu app principal em primeiro lugar.</string>
     <string name="about_verse">“Portanto, quer comais, quer bebais ou façais outra coisa qualquer, fazei\ntudo para a glória de Deus.”</string>
     <string name="about_verse_ref">1 Coríntios 10:31</string>
     <string name="about_project_url">github.com/eacarva/cineluz-launcher</string>

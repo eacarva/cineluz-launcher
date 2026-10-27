@@ -41,9 +41,13 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     private static final int APPS_START = 0xFFA6D94F, APPS_END = 0xFF3DB88B;
 
     private static final String PREFS = "launcher";
-    private static final String PREF_AUTO_HDMI = "auto_hdmi";
+    private static final String PREF_AUTO_OPEN = "auto_hdmi"; // nome antigo, mantido para quem atualiza
     private static final String PREF_LAST_BOOT = "last_boot_count";
     private static final String PREF_HDMI_PORT = "hdmi_port";
+    // App a abrir ao ligar (vazio = HDMI) e se o aparelho já mostrou entradas HDMI
+    private static final String PREF_START_APP = "start_app";
+    private static final String PREF_HAS_HDMI = "has_hdmi";
+    private static final String START_SLOT = "start";
 
     private static final String PREF_ASKED_HOME = "asked_home";
     private static final String PREF_ASKED_LOCATION = "asked_location";
@@ -51,6 +55,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     private static final int REQUEST_PICK_APP = 1;
     private static final int REQUEST_HOME_ROLE = 2;
     private static final int REQUEST_LOCATION = 3;
+    private static final int REQUEST_PICK_START = 4;
 
     // Medidas pensadas para tela 1920x1080; o resto é escalado
     private static final int GRID_LEFT = 206;
@@ -64,14 +69,19 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     private float unit;
     private SharedPreferences prefs;
 
-    private FrameLayout hdmiTile;
+    // Bloco grande: o HDMI, ou (em aparelhos sem HDMI) o app principal
+    private FrameLayout mainTile;
+    private boolean hasHdmi;
     private TextView hdmiLabel;
-    private HdmiPreview preview;
+    private HdmiPreview preview; // null sem HDMI
     private List<HdmiPorts.Port> ports;
     private HdmiPorts.Port currentPort;
     private Set<String> connectedBefore = new HashSet<>();
 
     private NetworkChip networkChip;
+    private View startChip;
+    private View switchToggle;
+    private TextView switchLabel;
     private GradientDrawable switchTrack;
     private View switchKnob;
     private boolean resumed;
@@ -102,18 +112,31 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         nlp.topMargin = px(48);
         root.addView(networkChip, nlp);
 
-        // Linha 1: HDMI (largo) e dois blocos de espelhamento
+        // Linha 1: HDMI ou app principal (largo) e dois blocos de espelhamento
         int y1 = GRID_TOP, y2 = GRID_TOP + ROW_H + GAP;
         int wide = 742, narrow = (GRID_WIDTH - wide - 2 * GAP) / 2;
         int x = GRID_LEFT;
-        hdmiTile = addTile(root, x, y1, wide, getDrawable(R.drawable.ic_hdmi), getString(R.string.tile_hdmi),
-                HDMI_START, HDMI_END, v -> openHdmi());
-        hdmiLabel = (TextView) hdmiTile.getTag();
-        hdmiTile.setOnLongClickListener(v -> {
-            nextPort();
-            return true;
-        });
-        preview = new HdmiPreview(this, hdmiTile, hdmiTile.getChildAt(0), this);
+        hasHdmi = detectHdmi();
+        if (hasHdmi) {
+            mainTile = addTile(root, x, y1, wide, getDrawable(R.drawable.ic_hdmi), getString(R.string.tile_hdmi),
+                    HDMI_START, HDMI_END, v -> openHdmi());
+            hdmiLabel = (TextView) mainTile.getTag();
+            mainTile.setOnLongClickListener(v -> {
+                nextPort();
+                return true;
+            });
+            preview = new HdmiPreview(this, mainTile, mainTile.getChildAt(0), this);
+        } else {
+            boolean chosen = startAppIntent() != null;
+            mainTile = addTile(root, x, y1, wide,
+                    chosen ? appIcon(startApp()) : getDrawable(R.drawable.ic_apps),
+                    chosen ? Launcher.appLabel(this, startApp()) : getString(R.string.main_app_pick),
+                    HDMI_START, HDMI_END, v -> openMainApp());
+            mainTile.setOnLongClickListener(v -> {
+                pickStartApp();
+                return true;
+            });
+        }
         x += wide + GAP;
         addSlotTile(root, TileSlot.AIRPLAY, x, y1, narrow);
         x += narrow + GAP;
@@ -129,7 +152,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         addTile(root, x, y2, third, getDrawable(R.drawable.ic_apps), getString(R.string.tile_apps),
                 APPS_START, APPS_END, v -> startActivity(new Intent(this, AppsActivity.class)));
 
-        addAutoHdmiSwitch(root, GRID_LEFT, y2 + ROW_H + 40);
+        addAutoOpenSwitch(root,GRID_LEFT, y2 + ROW_H + 40);
         addSupportButton(root, GRID_LEFT + GRID_WIDTH - 72, y2 + ROW_H + 40);
         addMakeDefaultButton(root, y2 + ROW_H + 40);
 
@@ -142,7 +165,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         idleMs = screenOff > 0 && screenOff < 24 * 60 * 60_000L ? Math.max(60_000L, screenOff - 15_000L) : 0;
 
         setContentView(root);
-        hdmiTile.requestFocus();
+        mainTile.requestFocus();
 
         // Primeira vez: oferece virar a tela inicial padrão
         if (!isDefaultHome() && !prefs.getBoolean(PREF_ASKED_HOME, false)) {
@@ -160,11 +183,17 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         networkChip.start();
         // Trava o mudo já na volta pra tela inicial: alguns apps de HDMI, ao
         // fechar, tiram o mudo por um instante e isso dava um "pico" de som
-        preview.resume();
+        if (preview != null) preview.resume();
         makeDefaultButton.setVisibility(isDefaultHome() ? View.GONE : View.VISIBLE);
+        updateAutoOpenSwitch(false);
         resetIdleTimer();
-        refreshPorts(false);
-        if (!maybeOpenHdmiAfterBoot()) {
+        if (!hasHdmi && detectHdmi()) {
+            // As entradas HDMI apareceram depois (ex.: logo após ligar)
+            recreate();
+            return;
+        }
+        if (hasHdmi) refreshPorts(false);
+        if (!maybeOpenAfterBoot()) {
             handler.postDelayed(this::tuneCurrentPort, 400);
         }
     }
@@ -176,7 +205,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         handler.removeCallbacksAndMessages(null);
         networkChip.stop();
         // Solta a entrada HDMI antes de outro app usar
-        preview.pause();
+        if (preview != null) preview.pause();
     }
 
     @Override
@@ -184,8 +213,8 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         super.onNewIntent(intent);
         // Home com o launcher já aberto: volta o foco pro HDMI e reinicia a
         // prévia (recupera a imagem se ela tiver sumido)
-        hdmiTile.requestFocus();
-        if (resumed) preview.restart();
+        mainTile.requestFocus();
+        if (resumed && preview != null) preview.restart();
     }
 
     @Override
@@ -244,8 +273,12 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
                 pickApp((TileSlot) focused.getTag(R.id.tile_slot));
                 return true;
             }
-            if (focused == hdmiTile) {
+            if (focused == mainTile && hasHdmi) {
                 nextPort();
+                return true;
+            }
+            if (focused == mainTile || focused == startChip || focused == switchToggle) {
+                pickStartApp();
                 return true;
             }
         }
@@ -258,6 +291,15 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         if (requestCode == REQUEST_HOME_ROLE) {
             makeDefaultButton.setVisibility(isDefaultHome() ? View.GONE : View.VISIBLE);
             maybeAskLocation();
+            return;
+        }
+        if (requestCode == REQUEST_PICK_START && resultCode == RESULT_OK && data != null) {
+            // Escolher o que abrir já liga a abertura automática
+            String pkg = data.getStringExtra(AppsActivity.EXTRA_PACKAGE);
+            SharedPreferences.Editor e = prefs.edit().putBoolean(PREF_AUTO_OPEN, true);
+            if (pkg == null) e.remove(PREF_START_APP); else e.putString(PREF_START_APP, pkg);
+            e.apply();
+            recreate();
             return;
         }
         if (requestCode != REQUEST_PICK_APP || resultCode != RESULT_OK || data == null) return;
@@ -345,6 +387,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     }
 
     private void tuneCurrentPort() {
+        if (preview == null) return;
         preview.tune(currentPort != null ? currentPort.inputId : null);
     }
 
@@ -377,15 +420,15 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
             toast(getString(R.string.hdmi_none));
             return;
         }
-        preview.stop();
+        if (preview != null) preview.stop();
         HdmiPorts.open(this, currentPort);
     }
 
     /**
-     * Na primeira vez que a tela inicial aparece depois de ligar, abre o HDMI.
-     * Devolve true se vai abrir.
+     * Na primeira vez que a tela inicial aparece depois de ligar, abre o app
+     * escolhido ou o HDMI. Devolve true se vai abrir.
      */
-    private boolean maybeOpenHdmiAfterBoot() {
+    private boolean maybeOpenAfterBoot() {
         int bootCount = Settings.Global.getInt(getContentResolver(), "boot_count", -1);
         if (bootCount < 0) return false;
         int lastBoot = prefs.getInt(PREF_LAST_BOOT, -1);
@@ -394,7 +437,13 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
 
         boolean firstRunEver = lastBoot < 0;
         boolean justBooted = SystemClock.elapsedRealtime() < 10 * 60 * 1000;
-        if (firstRunEver || !justBooted || !prefs.getBoolean(PREF_AUTO_HDMI, true)) return false;
+        if (firstRunEver || !justBooted || !autoOpenEnabled()) return false;
+        Intent app = startAppIntent();
+        if (app != null) {
+            handler.postDelayed(() -> Launcher.start(this, app), 1500);
+            return true;
+        }
+        if (!hasHdmi) return false;
         openHdmiWhenReady(0);
         return true;
     }
@@ -412,10 +461,69 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         }, attempt == 0 ? 1500 : 1000);
     }
 
-    private void toggleAutoHdmi() {
-        boolean enabled = !prefs.getBoolean(PREF_AUTO_HDMI, true);
-        prefs.edit().putBoolean(PREF_AUTO_HDMI, enabled).apply();
-        updateAutoHdmiSwitch(true);
+    /** Se as entradas HDMI demorarem a aparecer, vale a última vez que foram vistas. */
+    private boolean detectHdmi() {
+        if (!HdmiPorts.list(this).isEmpty()) {
+            if (!prefs.getBoolean(PREF_HAS_HDMI, false)) prefs.edit().putBoolean(PREF_HAS_HDMI, true).apply();
+            return true;
+        }
+        return HdmiPorts.manager(this) != null && prefs.getBoolean(PREF_HAS_HDMI, false);
+    }
+
+    // ---------- Abrir ao ligar ----------
+
+    private String startApp() {
+        return prefs.getString(PREF_START_APP, null);
+    }
+
+    /** O app escolhido para abrir ao ligar, ou null (HDMI / nenhum escolhido). */
+    private Intent startAppIntent() {
+        return Launcher.launchIntent(this, startApp());
+    }
+
+    /** Ligado por padrão em aparelhos com HDMI; nos outros, só depois de escolher um app. */
+    private boolean autoOpenEnabled() {
+        return prefs.getBoolean(PREF_AUTO_OPEN, hasHdmi);
+    }
+
+    private void toggleAutoOpen() {
+        if (!hasHdmi && startAppIntent() == null) {
+            pickStartApp();
+            return;
+        }
+        prefs.edit().putBoolean(PREF_AUTO_OPEN, !autoOpenEnabled()).apply();
+        updateAutoOpenSwitch(true);
+    }
+
+    /** O bloco grande em aparelhos sem HDMI. */
+    private void openMainApp() {
+        Intent app = startAppIntent();
+        if (app != null) Launcher.start(this, app); else pickStartApp();
+    }
+
+    /** Lista para escolher o que abrir ao ligar: HDMI (se houver) e os apps. */
+    private void pickStartApp() {
+        Intent intent = new Intent(this, AppsActivity.class);
+        intent.putExtra(AppsActivity.EXTRA_SLOT, START_SLOT);
+        intent.putExtra(AppsActivity.EXTRA_TITLE, getString(R.string.pick_start_title));
+        if (hasHdmi) {
+            intent.putExtra(AppsActivity.EXTRA_FIRST_LABEL, getString(R.string.tile_hdmi));
+            intent.putExtra(AppsActivity.EXTRA_FIRST_ICON, R.drawable.ic_hdmi);
+        }
+        startActivityForResult(intent, REQUEST_PICK_START);
+    }
+
+    private String startTargetName() {
+        if (startAppIntent() != null) return Launcher.appLabel(this, startApp());
+        return getString(hasHdmi ? R.string.tile_hdmi : R.string.start_none);
+    }
+
+    private android.graphics.drawable.Drawable appIcon(String pkg) {
+        try {
+            return getPackageManager().getApplicationIcon(pkg);
+        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+            return getDrawable(R.drawable.ic_apps);
+        }
     }
 
     // ---------- Blocos configuráveis ----------
@@ -437,6 +545,8 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         Intent intent = new Intent(this, AppsActivity.class);
         intent.putExtra(AppsActivity.EXTRA_SLOT, slot.key);
         intent.putExtra(AppsActivity.EXTRA_TITLE, getString(R.string.pick_title, getString(slot.labelRes)));
+        intent.putExtra(AppsActivity.EXTRA_FIRST_LABEL, getString(R.string.pick_automatic));
+        intent.putExtra(AppsActivity.EXTRA_FIRST_ICON, slot.iconRes);
         startActivityForResult(intent, REQUEST_PICK_APP);
     }
 
@@ -542,30 +652,76 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         return tile;
     }
 
-    /** Chave na tela inicial para ligar/desligar a abertura do HDMI ao ligar. */
-    private void addAutoHdmiSwitch(FrameLayout root, int x, int y) {
+    /**
+     * Barra "Ao ligar": um botão com o que abrir (HDMI ou um app, com setinha de
+     * lista) e a chave verde/vermelha que liga e desliga a abertura automática.
+     */
+    private void addAutoOpenSwitch(FrameLayout root, int x, int y) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(px(30), px(14), px(18), px(14));
-        row.setFocusable(true);
-        row.setClickable(true);
-        row.setOnClickListener(v -> toggleAutoHdmi());
+        row.setPadding(px(30), px(6), px(6), px(6));
+        GradientDrawable rowBg = new GradientDrawable();
+        rowBg.setCornerRadius(px(40));
+        rowBg.setColor(Color.argb(40, 255, 255, 255));
+        row.setBackground(rowBg);
 
-        TextView label = new TextView(this);
-        label.setText(R.string.auto_hdmi);
-        label.setTextColor(Color.WHITE);
-        label.setTextSize(TypedValue.COMPLEX_UNIT_PX, px(28));
-        row.addView(label);
+        TextView prefix = new TextView(this);
+        prefix.setText(R.string.auto_open);
+        prefix.setTextColor(0xCCFFFFFF);
+        prefix.setTextSize(TypedValue.COMPLEX_UNIT_PX, px(28));
+        row.addView(prefix);
 
-        // Trilho colorido + bolinha branca que desliza
+        // O que abrir: OK mostra a lista (HDMI e apps)
+        LinearLayout chip = new LinearLayout(this);
+        chip.setOrientation(LinearLayout.HORIZONTAL);
+        chip.setGravity(Gravity.CENTER_VERTICAL);
+        chip.setPadding(px(22), px(10), px(12), px(10));
+        chip.setFocusable(true);
+        chip.setClickable(true);
+        chip.setOnClickListener(v -> pickStartApp());
+        chip.setContentDescription(getString(R.string.pick_start_title));
+        Ui.pillBackground(chip, unit);
+        startChip = chip;
+
+        switchLabel = new TextView(this);
+        switchLabel.setTextColor(Color.WHITE);
+        switchLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX, px(28));
+        switchLabel.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        switchLabel.setSingleLine(true);
+        switchLabel.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        switchLabel.setMaxWidth(px(460));
+        chip.addView(switchLabel);
+
+        ImageView chevron = new ImageView(this);
+        chevron.setImageResource(R.drawable.ic_expand);
+        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(px(36), px(36));
+        clp.leftMargin = px(6);
+        chip.addView(chevron, clp);
+
+        LinearLayout.LayoutParams chipLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        chipLp.leftMargin = px(10);
+        row.addView(chip, chipLp);
+
+        // Chave liga/desliga: trilho colorido + bolinha branca que desliza
+        FrameLayout toggle = new FrameLayout(this);
+        toggle.setPadding(px(14), px(10), px(14), px(10));
+        toggle.setFocusable(true);
+        toggle.setClickable(true);
+        toggle.setOnClickListener(v -> toggleAutoOpen());
+        toggle.setOnLongClickListener(v -> {
+            pickStartApp();
+            return true;
+        });
+        Ui.pillBackground(toggle, unit);
+        switchToggle = toggle;
+
         switchTrack = new GradientDrawable();
         switchTrack.setCornerRadius(px(22));
         FrameLayout track = new FrameLayout(this);
         track.setBackground(switchTrack);
-        LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(px(84), px(44));
-        tlp.leftMargin = px(22);
-        row.addView(track, tlp);
+        toggle.addView(track, new FrameLayout.LayoutParams(px(84), px(44)));
 
         switchKnob = new View(this);
         GradientDrawable knob = new GradientDrawable();
@@ -577,14 +733,17 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         klp.leftMargin = px(4);
         track.addView(switchKnob, klp);
 
-        Ui.pillBackground(row, unit);
+        LinearLayout.LayoutParams toggleLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        toggleLp.leftMargin = px(6);
+        row.addView(toggle, toggleLp);
 
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
         lp.leftMargin = px(x);
         lp.topMargin = px(y);
         root.addView(row, lp);
-        updateAutoHdmiSwitch(false);
+        updateAutoOpenSwitch(false);
     }
 
     /** Botão discreto com o símbolo do Cineluz: abre a tela "Sobre", com o QR de apoio. */
@@ -625,8 +784,9 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         root.addView(button, lp);
     }
 
-    private void updateAutoHdmiSwitch(boolean animate) {
-        boolean enabled = prefs.getBoolean(PREF_AUTO_HDMI, true);
+    private void updateAutoOpenSwitch(boolean animate) {
+        switchLabel.setText(startTargetName());
+        boolean enabled = autoOpenEnabled();
         switchTrack.setColor(enabled ? SWITCH_ON : SWITCH_OFF);
         float knobX = enabled ? px(40) : 0;
         if (animate) {

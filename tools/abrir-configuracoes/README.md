@@ -1,6 +1,6 @@
 # Abrir Configurações
 
-App auxiliar (12 KB) que abre telas de configuração que o menu de algumas TV boxes
+App auxiliar (20 KB) que abre telas de configuração que o menu de algumas TV boxes
 esconde: as Configurações completas do Android, "Sobre o dispositivo" e as
 **Opções do desenvolvedor**. Serve para ligar a **depuração USB / ADB** em boxes
 travadas, onde tocar 7 vezes no "Número da versão" não funciona pelo menu de fábrica.
@@ -17,16 +17,21 @@ Mostra só os botões das telas que existem no aparelho.
 
 | Aparelho | Resultado |
 |---|---|
-| **UniTV S1** (Rockchip RK322x, Android 7.1.2) | ✅ O botão *Opções do desenvolvedor (tela direta, Android antigo)* abriu as Opções do desenvolvedor, com o menu de ADB pela rede |
+| **UniTV S1** (Rockchip RK322x, Android 7.1.2) | ✅ Abre as Opções do desenvolvedor (com o menu de ADB pela rede) e desativa/reativa o Google Play Services |
 | Projetor HY320 (Android 11) | ✅ Abre as Opções do desenvolvedor das Configurações de TV |
 
 ## Como usar
 
 1. Instale o APK pelo pendrive ou pelo navegador da box.
-2. Abra **Abrir Configurações** (no Cineluz: Apps).
-3. Tente os botões de *Opções do desenvolvedor*. Se nenhum abrir, use *Sobre o
-   dispositivo* e toque 7 vezes em *Número da versão*.
-4. Nas Opções do desenvolvedor, ligue a *Depuração USB* e, se existir, o ADB pela rede.
+2. Abra **Abrir Configurações** (no Cineluz: Apps). A tela mostra passos numerados,
+   cada um com uma explicação embaixo:
+   - **1. Ligar o ADB:** *Abrir as Opções do desenvolvedor* tenta sozinho todos os
+     caminhos conhecidos. Se não abrir, *Ative o modo desenvolvedor* leva a "Sobre o
+     dispositivo" para os 7 toques em "Número da versão".
+   - **2. Serviços do Google:** mostra se o Play Services e a Play Store estão ativos e
+     guia o que fazer (inclusive liberar o *Desativar* quando o Google é administrador
+     do dispositivo). O mesmo botão reativa.
+   - **3. Outros:** Configurações completas do Android.
 
 ## Compilar
 

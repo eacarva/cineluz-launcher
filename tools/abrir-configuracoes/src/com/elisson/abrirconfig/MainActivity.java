@@ -1,125 +1,281 @@
 package com.elisson.abrirconfig;
 
 import android.app.Activity;
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.widget.Button;
+import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Abre telas de configuração que o menu da box esconde: as Configurações
- * completas do Android, "Sobre o dispositivo" (tocar 7x no número da versão)
- * e as Opções do desenvolvedor (Depuração USB / ADB). Também abre a tela dos
- * serviços do Google, para desativá-los (liberar memória) ou reativá-los.
+ * Abre telas de configuração que o menu de algumas TV boxes esconde, em passos
+ * guiados: ligar o ADB (Opções do desenvolvedor) e desativar/reativar os
+ * serviços do Google para liberar memória.
  */
 public class MainActivity extends Activity {
 
     private static final String PHONE = "com.android.settings";
     private static final String TV = "com.android.tv.settings";
+    private static final String GMS = "com.google.android.gms";
+    private static final String PLAY_STORE = "com.android.vending";
+
+    private static final int BG = Color.rgb(0x2E, 0x32, 0x36);
+    private static final int CARD = Color.argb(40, 255, 255, 255);
+    private static final int CARD_FOCUS = Color.argb(80, 255, 255, 255);
+    private static final int TEXT_DIM = Color.argb(180, 255, 255, 255);
+
+    private float unit;
+    private LinearLayout list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setGravity(Gravity.CENTER);
-        root.setPadding(80, 40, 80, 40);
+        unit = Math.max(getResources().getDisplayMetrics().widthPixels,
+                getResources().getDisplayMetrics().heightPixels) / 1920f;
 
-        TextView title = new TextView(this);
-        title.setText("Abrir Configurações escondidas");
-        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26);
-        title.setGravity(Gravity.CENTER);
-        root.addView(title);
+        ScrollView scroll = new ScrollView(this);
+        scroll.setBackgroundColor(BG);
+        list = new LinearLayout(this);
+        list.setOrientation(LinearLayout.VERTICAL);
+        list.setPadding(px(240), px(60), px(240), px(60));
+        scroll.addView(list);
+        setContentView(scroll);
+    }
 
-        TextView hint = new TextView(this);
-        hint.setText("1) \"Sobre o dispositivo\": toque 7 vezes em \"Número da versão\".\n"
-                + "2) \"Opções do desenvolvedor\": ligue \"Depuração USB\" / \"Depuração ADB\" "
-                + "(e \"Depuração por rede\", se existir).");
-        hint.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        hint.setGravity(Gravity.CENTER);
-        hint.setPadding(0, 16, 0, 24);
-        root.addView(hint);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Monta de novo ao voltar: o estado (ex.: Play Services desativado) pode ter mudado
+        build();
+    }
 
-        addButton(root, "Sobre o dispositivo (Configurações completas)",
-                Settings.ACTION_DEVICE_INFO_SETTINGS, PHONE);
-        addButton(root, "Opções do desenvolvedor (Configurações completas)",
-                Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS, PHONE);
-        addButton(root, "Configurações completas do Android", Settings.ACTION_SETTINGS, PHONE);
-        addButton(root, "Sobre o dispositivo (Configurações de TV)",
-                Settings.ACTION_DEVICE_INFO_SETTINGS, TV);
-        addButton(root, "Opções do desenvolvedor (Configurações de TV)",
-                Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS, TV);
-        addComponentButton(root, "Opções do desenvolvedor (tela direta)",
-                new ComponentName(PHONE, PHONE + ".Settings$DevelopmentSettingsDashboardActivity"));
-        addComponentButton(root, "Opções do desenvolvedor (tela direta, Android antigo)",
-                new ComponentName(PHONE, PHONE + ".DevelopmentSettings"));
-        addComponentButton(root, "Opções do desenvolvedor (tela direta de TV)",
-                new ComponentName(TV, TV + ".system.development.DevelopmentActivity"));
+    private void build() {
+        list.removeAllViews();
+        text("Abrir Configurações", 56, Color.WHITE, 0, true);
+        text("Telas que o menu desta box esconde. Siga os passos de cima para baixo.",
+                28, TEXT_DIM, 8, false);
 
-        // Serviços do Google: a tela do app tem o botão Desativar/Ativar
-        // (na Play Store e apps do Google dependem do Play Services)
-        // O Play Services costuma ser "administrador do dispositivo" (Encontre meu
-        // dispositivo): enquanto for, o botão Desativar fica bloqueado
-        addComponentButton(root, "Administradores do dispositivo (liberar Desativar)",
-                new ComponentName(PHONE, PHONE + ".DeviceAdminSettings"));
-        addAppDetailsButton(root, "Google Play Services (ativar/desativar)", "com.google.android.gms");
-        addAppDetailsButton(root, "Play Store (ativar/desativar)", "com.android.vending");
-
-        if (root.getChildCount() == 2) {
-            TextView none = new TextView(this);
-            none.setText("Nenhuma dessas telas existe neste aparelho.");
-            root.addView(none);
+        // ---------- 1. ADB ----------
+        section("1. Ligar o ADB (depuração)");
+        List<Intent> dev = developerScreens();
+        if (!dev.isEmpty()) {
+            action("Abrir as Opções do desenvolvedor",
+                    "Lá dentro, ligue \"Depuração USB\" e, se houver, o ADB pela rede.",
+                    v -> openFirst(dev));
+        }
+        Intent about = prefer(new Intent(Settings.ACTION_DEVICE_INFO_SETTINGS));
+        if (resolves(about)) {
+            action("Não abriu? Ative o modo desenvolvedor",
+                    "Abre \"Sobre o dispositivo\": aperte OK 7 vezes em \"Número da versão\" e volte ao passo acima.",
+                    v -> open(about));
         }
 
-        setContentView(root);
-    }
-
-    private void addButton(LinearLayout root, String label, String action, String pkg) {
-        addButton(root, label, new Intent(action).setPackage(pkg));
-    }
-
-    private void addAppDetailsButton(LinearLayout root, String label, String pkg) {
-        try {
-            // Também encontra apps desativados
-            getPackageManager().getApplicationInfo(pkg, android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS);
-        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
-            return;
-        }
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                android.net.Uri.fromParts("package", pkg, null));
-        // Boxes com dois apps de configurações: abre direto as completas, sem perguntar
-        for (android.content.pm.ResolveInfo ri : getPackageManager().queryIntentActivities(intent, 0)) {
-            if (PHONE.equals(ri.activityInfo.packageName)) intent.setClassName(PHONE, ri.activityInfo.name);
-        }
-        addButton(root, label, intent);
-    }
-
-    private void addComponentButton(LinearLayout root, String label, ComponentName cn) {
-        addButton(root, label, new Intent().setComponent(cn));
-    }
-
-    private void addButton(LinearLayout root, String label, Intent intent) {
-        // Só mostra o que existe neste aparelho
-        if (intent.resolveActivity(getPackageManager()) == null) return;
-        Button b = new Button(this);
-        b.setText(label);
-        b.setAllCaps(false);
-        b.setOnClickListener(v -> {
-            try {
-                startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-            } catch (Exception e) {
-                Toast.makeText(this, "Esta tela não existe neste aparelho", Toast.LENGTH_SHORT).show();
+        // ---------- 2. Google ----------
+        if (installed(GMS) || installed(PLAY_STORE)) {
+            section("2. Serviços do Google (liberar memória)");
+            text("Sem eles, a Play Store, o YouTube e outros apps do Google param de funcionar "
+                    + "até você reativar aqui.", 24, TEXT_DIM, 0, false);
+            if (installed(GMS)) googleServicesStep();
+            if (installed(PLAY_STORE)) {
+                boolean on = enabled(PLAY_STORE);
+                action((on ? "Desativar" : "Reativar") + " a Play Store",
+                        "Estado: " + (on ? "ativa" : "desativada") + ". Na tela que abrir, aperte \""
+                                + (on ? "Desativar" : "Ativar") + "\".",
+                        v -> open(appDetails(PLAY_STORE)));
             }
-        });
+        }
+
+        // ---------- 3. Outros ----------
+        section("3. Outros");
+        Intent full = new Intent(Settings.ACTION_SETTINGS).setPackage(PHONE);
+        if (resolves(full)) {
+            action("Configurações completas do Android",
+                    "Todas as opções do Android, inclusive as que o menu da box não mostra.",
+                    v -> open(full));
+        }
+
+        // Foco no primeiro botão
+        for (int i = 0; i < list.getChildCount(); i++) {
+            if (list.getChildAt(i).isFocusable()) {
+                list.getChildAt(i).requestFocus();
+                break;
+            }
+        }
+    }
+
+    /** O Play Services só pode ser desativado depois de deixar de ser administrador. */
+    private void googleServicesStep() {
+        boolean on = enabled(GMS);
+        if (on && isDeviceAdmin(GMS)) {
+            Intent admins = new Intent().setComponent(new ComponentName(PHONE, PHONE + ".DeviceAdminSettings"));
+            if (resolves(admins)) {
+                action("Desativar o Google Play Services: passo A",
+                        "Estado: ativo. Abra cada item do Google (\"Localizador\", \"Screen lock service\") "
+                                + "e escolha \"Desativar o administrador\". Depois volte aqui.",
+                        v -> open(admins));
+                return;
+            }
+        }
+        action(on ? "Desativar o Google Play Services" : "Reativar o Google Play Services",
+                "Estado: " + (on ? "ativo" : "desativado") + ". Na tela que abrir, aperte \""
+                        + (on ? "Desativar" : "Ativar") + "\".",
+                v -> open(appDetails(GMS)));
+    }
+
+    // ---------- Telas ----------
+
+    /** Caminhos conhecidos para as Opções do desenvolvedor, do mais comum ao mais raro. */
+    private List<Intent> developerScreens() {
+        Intent[] candidates = {
+                new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).setPackage(PHONE),
+                new Intent().setComponent(new ComponentName(PHONE, PHONE + ".Settings$DevelopmentSettingsDashboardActivity")),
+                new Intent().setComponent(new ComponentName(PHONE, PHONE + ".DevelopmentSettings")),
+                new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).setPackage(TV),
+                new Intent().setComponent(new ComponentName(TV, TV + ".system.development.DevelopmentActivity")),
+        };
+        List<Intent> found = new ArrayList<>();
+        for (Intent i : candidates) if (resolves(i)) found.add(i);
+        return found;
+    }
+
+    private Intent appDetails(String pkg) {
+        return prefer(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", pkg, null)));
+    }
+
+    /** Boxes com dois apps de configurações: abre direto as completas, sem perguntar. */
+    private Intent prefer(Intent intent) {
+        for (ResolveInfo ri : getPackageManager().queryIntentActivities(intent, 0)) {
+            if (PHONE.equals(ri.activityInfo.packageName)) return intent.setClassName(PHONE, ri.activityInfo.name);
+        }
+        return intent;
+    }
+
+    private void openFirst(List<Intent> intents) {
+        for (Intent i : intents) {
+            try {
+                startActivity(new Intent(i).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                return;
+            } catch (Exception ignored) {
+                // tenta o próximo caminho
+            }
+        }
+        Toast.makeText(this, "Esta box não deixou abrir. Tente o botão de baixo.", Toast.LENGTH_LONG).show();
+    }
+
+    private void open(Intent intent) {
+        List<Intent> one = new ArrayList<>();
+        one.add(intent);
+        openFirst(one);
+    }
+
+    private boolean resolves(Intent intent) {
+        return intent.resolveActivity(getPackageManager()) != null;
+    }
+
+    private boolean installed(String pkg) {
+        try {
+            getPackageManager().getApplicationInfo(pkg, PackageManager.MATCH_DISABLED_COMPONENTS);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private boolean enabled(String pkg) {
+        try {
+            ApplicationInfo ai = getPackageManager().getApplicationInfo(pkg, PackageManager.MATCH_DISABLED_COMPONENTS);
+            return ai.enabled;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private boolean isDeviceAdmin(String pkg) {
+        DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+        List<ComponentName> admins = dpm != null ? dpm.getActiveAdmins() : null;
+        if (admins == null) return false;
+        for (ComponentName cn : admins) if (pkg.equals(cn.getPackageName())) return true;
+        return false;
+    }
+
+    // ---------- Visual ----------
+
+    private void section(String title) {
+        TextView t = text(title, 34, Color.WHITE, 48, true);
+        t.setPadding(0, 0, 0, px(8));
+    }
+
+    private TextView text(String s, int size, int color, int topMargin, boolean bold) {
+        TextView tv = new TextView(this);
+        tv.setText(s);
+        tv.setTextColor(color);
+        tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, px(size));
+        if (bold) tv.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = 8;
-        root.addView(b, lp);
+        lp.topMargin = px(topMargin);
+        list.addView(tv, lp);
+        return tv;
+    }
+
+    /** Botão grande: título e, embaixo, o que fazer. Borda branca quando em foco. */
+    private void action(String title, String hint, View.OnClickListener onClick) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(px(36), px(22), px(36), px(22));
+        card.setFocusable(true);
+        card.setClickable(true);
+        card.setOnClickListener(onClick);
+
+        final GradientDrawable normal = new GradientDrawable();
+        normal.setCornerRadius(px(18));
+        normal.setColor(CARD);
+        final GradientDrawable focused = new GradientDrawable();
+        focused.setCornerRadius(px(18));
+        focused.setColor(CARD_FOCUS);
+        focused.setStroke(px(4), Color.WHITE);
+        card.setBackground(normal);
+        card.setOnFocusChangeListener((v, has) -> v.setBackground(has ? focused : normal));
+
+        TextView t = new TextView(this);
+        t.setText(title);
+        t.setTextColor(Color.WHITE);
+        t.setTextSize(TypedValue.COMPLEX_UNIT_PX, px(32));
+        t.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        card.addView(t);
+
+        TextView h = new TextView(this);
+        h.setText(hint);
+        h.setTextColor(TEXT_DIM);
+        h.setTextSize(TypedValue.COMPLEX_UNIT_PX, px(24));
+        h.setPadding(0, px(6), 0, 0);
+        card.addView(h);
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = px(14);
+        list.addView(card, lp);
+    }
+
+    private int px(float designPx) {
+        return Math.round(designPx * unit);
     }
 }

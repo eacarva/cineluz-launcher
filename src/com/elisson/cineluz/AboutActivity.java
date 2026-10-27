@@ -62,6 +62,14 @@ public class AboutActivity extends Activity {
             root.addView(text(donateUrl, 26, 0xB3FFFFFF, 14));
         }
 
+        // Diagnóstico: o que o aparelho avisou ao desligar/ligar (ajuda em boxes
+        // onde a abertura automática não funciona)
+        String power = PowerEvents.recentLog(this);
+        if (!power.isEmpty()) {
+            TextView diag = text(getString(R.string.about_power_log) + "\n" + power, 20, 0x80FFFFFF, 36);
+            root.addView(diag);
+        }
+
         setContentView(root);
     }
 

@@ -31,7 +31,7 @@ import java.util.Set;
  * Tela inicial do Cineluz Launcher: HDMI em primeiro (com prévia ao vivo),
  * quatro blocos configuráveis e a lista de apps.
  */
-public class HomeActivity extends Activity implements HdmiPreview.Listener {
+public class HomeActivity extends Activity implements HdmiPreview.Listener, PowerEvents.Listener {
 
     // Cinza chumbo
     static final int BG_COLOR = Color.rgb(0x2E, 0x32, 0x36);
@@ -58,6 +58,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     private static final int REQUEST_HOME_ROLE = 2;
     private static final int REQUEST_LOCATION = 3;
     private static final int REQUEST_PICK_START = 4;
+    private static final long WAKE_SETTLE_MS = 3000;
 
     // Medidas pensadas para tela 1920x1080; o resto é escalado
     private static final int GRID_LEFT = 206;
@@ -97,6 +98,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         super.onCreate(savedInstanceState);
         prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
         PowerEvents.register(getApplicationContext());
+        DeviceDefaults.apply(this);
         DisplayMetrics dm = getResources().getDisplayMetrics();
         unit = Math.max(dm.widthPixels, dm.heightPixels) / 1920f;
 
@@ -132,7 +134,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
         } else {
             boolean chosen = startAppIntent() != null;
             mainTile = addTile(root, x, y1, wide,
-                    chosen ? appIcon(startApp()) : getDrawable(R.drawable.ic_apps),
+                    chosen ? AppIcons.forPackage(this, startApp()) : getDrawable(R.drawable.ic_apps),
                     chosen ? Launcher.appLabel(this, startApp()) : getString(R.string.main_app_pick),
                     HDMI_START, HDMI_END, v -> openMainApp());
             mainTile.setOnLongClickListener(v -> {
@@ -193,6 +195,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     protected void onResume() {
         super.onResume();
         resumed = true;
+        PowerEvents.setListener(this);
         networkChip.start();
         // Trava o mudo já na volta pra tela inicial: alguns apps de HDMI, ao
         // fechar, tiram o mudo por um instante e isso dava um "pico" de som
@@ -215,6 +218,7 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     protected void onPause() {
         super.onPause();
         resumed = false;
+        PowerEvents.setListener(null);
         handler.removeCallbacksAndMessages(null);
         networkChip.stop();
         // Solta a entrada HDMI antes de outro app usar
@@ -457,8 +461,29 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
      * Devolve true se vai abrir.
      */
     private boolean maybeOpenAfterBoot() {
-        boolean turnedOn = justBooted() || PowerEvents.consumeWake();
-        if (!turnedOn || !autoOpenEnabled()) return false;
+        boolean booted = justBooted();
+        boolean woke = PowerEvents.consumeWake(); // sempre consome, para não abrir de novo depois
+        if (!booted && !woke) return false;
+        if (!autoOpenEnabled()) return false;
+        if (woke) {
+            // Acabou de acordar: dá um tempo para o sistema de som e o HDMI voltarem
+            handler.postDelayed(this::openStartTarget, WAKE_SETTLE_MS);
+            return true;
+        }
+        return openStartTarget();
+    }
+
+    /** Box em modo de espera que acorda com o Cineluz já na tela (sem pausar). */
+    @Override
+    public void onWake() {
+        if (resumed && PowerEvents.consumeWake() && autoOpenEnabled()) {
+            handler.postDelayed(this::openStartTarget, WAKE_SETTLE_MS);
+        }
+    }
+
+    /** Abre o que foi escolhido para "Ao ligar", se estiver ligado. Devolve true se vai abrir. */
+    private boolean openStartTarget() {
+        if (!autoOpenEnabled()) return false;
         Intent app = startAppIntent();
         if (app != null) {
             handler.postDelayed(() -> Launcher.start(this, app), 1500);
@@ -553,14 +578,6 @@ public class HomeActivity extends Activity implements HdmiPreview.Listener {
     private String startTargetName() {
         if (startAppIntent() != null) return Launcher.appLabel(this, startApp());
         return getString(hasHdmi ? R.string.tile_hdmi : R.string.start_none);
-    }
-
-    private android.graphics.drawable.Drawable appIcon(String pkg) {
-        try {
-            return getPackageManager().getApplicationIcon(pkg);
-        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
-            return getDrawable(R.drawable.ic_apps);
-        }
     }
 
     // ---------- Blocos configuráveis ----------

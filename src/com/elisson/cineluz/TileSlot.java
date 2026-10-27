@@ -3,7 +3,6 @@ package com.elisson.cineluz;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 
 /**
@@ -37,6 +36,7 @@ enum TileSlot {
             new String[]{
                     "com.softwinner.TvdFileManager",
                     "com.droidlogic.FileBrower",
+                    "com.android.rockchip",          // RkExplorer (boxes Rockchip)
                     "com.lonelycatgames.Xplore",     // X-plore
                     "com.alphainventor.filemanager", // File Manager+
             },
@@ -46,6 +46,7 @@ enum TileSlot {
             0xFFB43BB8, 0xFF8524D0,
             new String[]{
                     "com.htc.htcsettings",           // configurações dos projetores HY
+                    "com.android.tv.settings",       // Android TV (evita perguntar entre dois apps)
             },
             "android.settings.SETTINGS");
 
@@ -88,15 +89,10 @@ enum TileSlot {
         return ctx.getString(labelRes);
     }
 
-    /** Ícone do bloco: o do app escolhido pelo usuário, ou o ícone do papel. */
+    /** Ícone do bloco: o do tipo do app escolhido pelo usuário, ou o ícone do papel. */
     Drawable icon(Context ctx) {
         String custom = customPackage(ctx);
-        if (custom != null && Launcher.isInstalled(ctx, custom)) {
-            try {
-                return ctx.getPackageManager().getApplicationIcon(custom);
-            } catch (PackageManager.NameNotFoundException ignored) {
-            }
-        }
+        if (custom != null && Launcher.isInstalled(ctx, custom)) return AppIcons.forPackage(ctx, custom);
         return ctx.getDrawable(iconRes);
     }
 
